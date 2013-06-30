@@ -1,0 +1,17 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Map.cs">
+    <Files>
+      <File FileName="Main.cs" Line="18" Column="19" />
+      <File FileName="Network.cs" Line="82" Column="4" />
+      <File FileName="Player.cs" Line="22" Column="1" />
+      <File FileName="Map.cs" Line="65" Column="30" />
+      <File FileName="Engine.cs" Line="34" Column="1" />
+      <File FileName="MapLayer.cs" Line="22" Column="18" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
