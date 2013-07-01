@@ -69,6 +69,9 @@ namespace Server
 						SendToOthers(curPlayer);
 					}
 					break;
+					case "TALK":
+						SendText(curPlayer,args[0]);
+						break;
 
 				}
 			}
@@ -116,7 +119,7 @@ namespace Server
 			byte[] buffer = encoder.GetBytes(data);
 			ns.Write(buffer,0,buffer.Length);
 			ns.Flush();
-			Thread.Sleep(30);
+			Thread.Sleep(10);
 		}
 		static void SendData (string data)
 		{
@@ -151,6 +154,12 @@ namespace Server
 			foreach (Player p in Players)
 				if (p != current) 
 					SendData(current,String.Format("NPLR{0},{1},{2},{3}",p.ID,p.position.X,p.position.Y,p.textureID));
+		}
+		static void SendText (Player current, string text)
+		{
+			foreach (Player p in Players)
+				if (p != current) 
+					SendData(current,String.Format("TALK{0},{1}",p.Name,text));
 		}
 
 

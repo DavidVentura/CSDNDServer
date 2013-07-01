@@ -2,15 +2,15 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Network.cs">
     <Files>
-      <File FileName="Network.cs" Line="82" Column="49" />
-      <File FileName="Player.cs" Line="26" Column="15" />
+      <File FileName="Network.cs" Line="129" Column="3" />
+      <File FileName="Player.cs" Line="11" Column="22" />
       <File FileName="Engine.cs" Line="32" Column="18" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
           <Node name="CSDNDServer" expanded="True">
-            <Node name="Network.cs" selected="True" />
+            <Node name="References" expanded="True" selected="True" />
           </Node>
         </State>
       </Pad>
