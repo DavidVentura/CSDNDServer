@@ -13,10 +13,10 @@ namespace Server
 		private static TcpListener tcpListener;
 		private static List<Player> Players = new List<Player>();
 		private static ASCIIEncoding encoder = new ASCIIEncoding();
-		private static string LastData="";
 		public static List<Player> getPlayers {
 			get { return Players; }
 		}
+		private static int playerID=0;
 
 		public static void Init ()
 		{
@@ -40,7 +40,8 @@ namespace Server
 			Player curPlayer = AddPlayer(tcpClient);
 			Console.WriteLine("Player connected");
 			NetworkStream clientStream = tcpClient.GetStream ();
-			SendInitialData(clientStream);
+			SendInitialData(curPlayer);
+
 			byte[] message = new byte[4096];
 			int bytesRead;
 			while (true) {
@@ -60,10 +61,13 @@ namespace Server
 				switch(header){
 					case "INIP": //initial position
 						curPlayer.position=new Vector2(Int16.Parse(args[0]),Int16.Parse(args[1]));
+						SendNewPlayer(curPlayer);
 						break;
 					case "MOVE":
-					if (curPlayer.Move(new Vector2(Int16.Parse(args[0]),Int16.Parse(args[1]))))
+					if (curPlayer.Move(new Vector2(Int16.Parse(args[0]),Int16.Parse(args[1])))){
 						Network.SendData(curPlayer.socket.GetStream(),"POSI"+curPlayer.Position.X+","+curPlayer.Position.Y);
+						SendToOthers(curPlayer);
+					}
 					break;
 
 				}
@@ -72,11 +76,14 @@ namespace Server
 			RemovePlayer(curPlayer);
 		}
 
-		static void SendInitialData (NetworkStream clientStream)
+		static void SendInitialData (Player p)
 		{
+			NetworkStream clientStream = p.socket.GetStream();
+			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
-			SendData(clientStream,Engine.GlobalTextures);
+
+			SendPlayers(p);
 		}
 
 		static string LayerToString (LayerType t)
@@ -96,18 +103,20 @@ namespace Server
 
 		static Player AddPlayer (TcpClient socket)
 		{
-			Player p = new Player(socket);
+			Player p = new Player(socket,playerID++);
 			Players.Add (p);
 			return p;
 		}
+		static void SendData (Player p, string data)
+		{
+			SendData (p.socket.GetStream(),data);
+		}
 		static void SendData(NetworkStream ns, string data) {
-			if (data==LastData) return;
-			LastData=data;
 			data+="|";
 			byte[] buffer = encoder.GetBytes(data);
 			ns.Write(buffer,0,buffer.Length);
 			ns.Flush();
-			Thread.Sleep(20);
+			Thread.Sleep(30);
 		}
 		static void SendData (string data)
 		{
@@ -116,8 +125,34 @@ namespace Server
 		}
 		static void RemovePlayer (Player p)
 		{
+			foreach(Player P in Players)
+				if (P!=p)
+					SendData(P,String.Format("RPLR{0}",p.ID));
 			Players.Remove(p);
 		}
+		static void SendNewPlayer (Player curPlayer)
+		{
+			string data = String.Format("NPLR{0},{1},{2},{3}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
+			foreach (Player p in Players)
+				if (p != curPlayer) {
+				SendData(p.socket.GetStream(),data);
+				}
+		}
+		static void SendToOthers (Player curPlayer)
+		{
+			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
+			foreach (Player p in Players)
+				if (p != curPlayer) {
+					SendData(p.socket.GetStream(),data);
+				}
+		}
+		static void SendPlayers (Player current)
+		{
+			foreach (Player p in Players)
+				if (p != current) 
+					SendData(current,String.Format("NPLR{0},{1},{2},{3}",p.ID,p.position.X,p.position.Y,p.textureID));
+		}
+
 
 	}
 }

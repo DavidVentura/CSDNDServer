@@ -1,17 +1,35 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Map.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Network.cs">
     <Files>
-      <File FileName="Main.cs" Line="18" Column="19" />
-      <File FileName="Network.cs" Line="82" Column="4" />
-      <File FileName="Player.cs" Line="22" Column="1" />
-      <File FileName="Map.cs" Line="65" Column="30" />
-      <File FileName="Engine.cs" Line="34" Column="1" />
-      <File FileName="MapLayer.cs" Line="22" Column="18" />
+      <File FileName="Network.cs" Line="82" Column="49" />
+      <File FileName="Player.cs" Line="26" Column="15" />
+      <File FileName="Engine.cs" Line="32" Column="18" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="CSDNDServer" expanded="True">
+            <Node name="Network.cs" selected="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>Players[0]</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/home/david/CSDNDServer/Network.cs" line="52" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
+    <Watch file="Network.cs" line="146" offsetX="402" offsetY="1875" expression="Players[0]" liveUpdate="False" />
+  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
 </Properties>
