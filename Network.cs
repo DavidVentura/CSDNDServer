@@ -13,7 +13,7 @@ namespace Server
 		private static TcpListener tcpListener;
 		private static List<Player> Players = new List<Player>();
 		private static ASCIIEncoding encoder = new ASCIIEncoding();
-
+		private static string LastData="";
 		public static List<Player> getPlayers {
 			get { return Players; }
 		}
@@ -101,6 +101,8 @@ namespace Server
 			return p;
 		}
 		static void SendData(NetworkStream ns, string data) {
+			if (data==LastData) return;
+			LastData=data;
 			data+="|";
 			byte[] buffer = encoder.GetBytes(data);
 			ns.Write(buffer,0,buffer.Length);
