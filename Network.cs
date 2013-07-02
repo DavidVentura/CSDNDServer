@@ -130,6 +130,7 @@ namespace Server
 			foreach(Player P in Players)
 				if (P!=p)
 					SendData(P,String.Format("RPLR{0}",p.ID));
+			Console.WriteLine(String.Format("{0} Disconnected",p.Name));
 			Players.Remove(p);
 		}
 		static void SendNewPlayer (Player curPlayer)
