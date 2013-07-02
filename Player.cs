@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using System.Net.Sockets;
 
 
@@ -20,9 +19,9 @@ namespace Server
 		}
 
 		public TcpClient socket;
-		public Vector2 position;
+		public Coord position;
 
-		public Vector2 Position {
+		public Coord Position {
 			get { return position; }
 		}
 		public Player (TcpClient t, int id)
@@ -32,7 +31,7 @@ namespace Server
 			name+=id;
 		}
 
-		public bool Move (Vector2 targetPos)
+		public bool Move (Coord targetPos)
 		{
 			if (Map.ValidPosition (position+targetPos)) {
 				position += targetPos;

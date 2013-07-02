@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Xna.Framework;
 
 namespace Server
 {
@@ -19,7 +18,7 @@ namespace Server
 			this.Type = t;
 			Tiles = data;
 		}
-		public int TileAt (Vector2 position)
+		public int TileAt (Coord position)
 		{
 			if (Tiles[(int)position.X,(int)position.Y]!=0)
 				return Tiles[(int)position.X,(int)position.Y];

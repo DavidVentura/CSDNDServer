@@ -1,6 +1,6 @@
 using System;
 using System.Data;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using System.Collections.Generic;
 
 namespace Server
@@ -9,6 +9,29 @@ namespace Server
 		Ground=0,
 		Blocking=1,
 		Object=2
+	}
+	public struct Coord {
+		public int X;
+		public int Y;
+		public Coord (int x, int y)
+		{
+			X=x;
+			Y=y;
+		}
+		public static bool operator ==(Coord c, Coord c2){
+			return (c.X==c2.X && c.Y==c2.Y);
+		}
+		public static bool operator !=(Coord c, Coord c2){
+			return (c.X!=c2.X || c.Y!=c2.Y);
+		}
+
+		public static Coord operator +(Coord c, Coord c2){
+			return new Coord(c.X+c2.X, c.Y+c2.Y);
+		}
+		public static Coord operator -(Coord c, Coord c2){
+			return new Coord(c.X-c2.X, c.Y-c2.Y);
+		}
+
 	}
 
 	public static class Engine
@@ -28,7 +51,7 @@ namespace Server
 		{
 			IDbConnection dbcon;
 			IDataReader reader;
-			dbcon = (IDbConnection)new SqliteConnection (ConnectionString);
+			dbcon = (IDbConnection)new SQLiteConnection (ConnectionString);
 			dbcon.Open ();
 			IDbCommand dbcmd = dbcon.CreateCommand ();
 

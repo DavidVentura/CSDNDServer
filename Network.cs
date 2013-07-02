@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Microsoft.Xna.Framework;
 
 namespace Server
 {
@@ -60,11 +59,11 @@ namespace Server
 
 				switch(header){
 					case "INIP": //initial position
-						curPlayer.position=new Vector2(Int16.Parse(args[0]),Int16.Parse(args[1]));
+						curPlayer.position=new Coord(Int16.Parse(args[0]),Int16.Parse(args[1]));
 						SendNewPlayer(curPlayer);
 						break;
 					case "MOVE":
-					if (curPlayer.Move(new Vector2(Int16.Parse(args[0]),Int16.Parse(args[1])))){
+					if (curPlayer.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
 						Network.SendData(curPlayer.socket.GetStream(),"POSI"+curPlayer.Position.X+","+curPlayer.Position.Y);
 						SendToOthers(curPlayer);
 					}

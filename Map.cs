@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
 
@@ -49,14 +48,14 @@ namespace Server
 			return null;
 		}
 
-		public static bool withinBounds (Vector2 position)
+		public static bool withinBounds (Coord position)
 		{
 			if (position.X < 0 || position.Y < 0 || position.X >= width || position.Y >= height)
 				return false;
 			return true;
 		}
 
-		public static bool ValidPosition (Vector2 position)
+		public static bool ValidPosition (Coord position)
 		{
 			if (!withinBounds(position))
 				return false;
