@@ -1,6 +1,10 @@
 using System;
 using System.Data;
+#if LINUX
+using Mono.Data.Sqlite;
+#else
 using System.Data.SQLite;
+#endif
 using System.Collections.Generic;
 
 namespace Server
@@ -51,7 +55,11 @@ namespace Server
 		{
 			IDbConnection dbcon;
 			IDataReader reader;
-			dbcon = (IDbConnection)new SQLiteConnection (ConnectionString);
+			#if LINUX
+				dbcon = (IDbConnection)new SqliteConnection (ConnectionString);
+			#else
+				dbcon = (IDbConnection)new SQLiteConnection (ConnectionString);
+			#endif
 			dbcon.Open ();
 			IDbCommand dbcmd = dbcon.CreateCommand ();
 
