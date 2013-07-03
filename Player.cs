@@ -9,7 +9,7 @@ namespace Server
 		public int ID {
 			get { return id; }
 		}
-		private int texture=8;//TODO: Load from databse
+		private int texture;
 		public int textureID {
 			get { return texture; }
 		}
@@ -24,11 +24,11 @@ namespace Server
 		public Coord Position {
 			get { return position; }
 		}
-		public Player (TcpClient t, int id, string name)
+		public Player (int id, string name, int sprite)
 		{
 			this.id=id;
-			socket=t;
 			this.name=name;
+			texture = sprite;
 			position = Map.Spawnpoint;
 		}
 

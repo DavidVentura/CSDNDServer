@@ -15,8 +15,6 @@ namespace Server
 		public static List<Player> getPlayers {
 			get { return Players; }
 		}
-		private static int playerID=0;
-
 		public static void Init ()
 		{
 			tcpListener = new TcpListener(IPAddress.Any,3000);
@@ -28,7 +26,6 @@ namespace Server
 			tcpListener.Start() ;
 			while(true){
 				TcpClient client = tcpListener.AcceptTcpClient();
-
 				Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
 				clientThread.Start(client);
 			}
@@ -102,7 +99,11 @@ namespace Server
 
 		static Player AddPlayer (TcpClient socket, string name)
 		{
-			Player p = new Player(socket,playerID++,name);
+
+			Player p =  Engine.Login(name);
+			if (p==null) 
+				return null;
+			p.socket=socket;
 			Players.Add (p);
 			return p;
 		}

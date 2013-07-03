@@ -44,6 +44,9 @@ namespace Server
 		private static List<int> textures = new List<int>();
 		private const string ConnectionString = "URI=file:database.db";
 		private const int MAPID = 1;
+		private static IDbConnection dbcon;
+		private static IDataReader reader;
+		private static IDbCommand dbcmd;
 
 		public static void Initialize ()
 		{
@@ -53,15 +56,14 @@ namespace Server
 		private static void LoadDatabase ()
 		{
 			Console.WriteLine ("Started loading from DB");
-			IDbConnection dbcon;
-			IDataReader reader;
+
 			#if LINUX
 				dbcon = (IDbConnection)new SqliteConnection (ConnectionString);
 			#else
 				dbcon = (IDbConnection)new SQLiteConnection (ConnectionString);
 			#endif
 			dbcon.Open ();
-			IDbCommand dbcmd = dbcon.CreateCommand ();
+			dbcmd = dbcon.CreateCommand ();
 
 			dbcmd.CommandText = "SELECT WIDTH,HEIGHT,SPAWNX,SPAWNY FROM MAP WHERE ID=" + MAPID;
 			reader = dbcmd.ExecuteReader ();
@@ -83,13 +85,6 @@ namespace Server
 				GlobalTextures+=textures[i]+",";
 			GlobalTextures=GlobalTextures.TrimEnd(',');
 			Console.WriteLine ("Texture list loaded");
-			dbcmd.Dispose ();
-			reader.Close();
-			reader = null;
-			dbcmd.Dispose();
-			dbcmd = null;
-			dbcon.Close();
-			dbcon = null;
 			Console.WriteLine ("Finished loading");
 		}
 
@@ -108,8 +103,26 @@ namespace Server
 				}
 			}
 			return new MapLayer(type,width,height,data);
-		}	
+		}
+		public static void Unload() { //TODO:Call this
+			reader.Close();
+			reader = null;
+			dbcon.Close();
+			dbcon = null;
+		}
 
+		public static Player Login (string name)
+		{
+			dbcmd = dbcon.CreateCommand();
+			dbcmd.CommandText = string.Format("SELECT ID,SPRITE FROM PLAYERS WHERE NAME='{0}'",name.ToUpper());
+			reader = dbcmd.ExecuteReader ();
+			if (reader.Read ()) {
+				Player p = new Player(reader.GetInt32(0),name,reader.GetInt32(1));
+
+				return p;
+			}
+			return null;
+		}
 	}
 }
 
