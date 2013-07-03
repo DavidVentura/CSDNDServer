@@ -62,7 +62,6 @@ namespace Server
 						break;
 					case "MOVE":
 					if (curPlayer.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
-						Network.SendData(curPlayer.socket.GetStream(),"POSI"+curPlayer.Position.X+","+curPlayer.Position.Y);
 						SendMovement(curPlayer);
 					}
 					break;
@@ -146,9 +145,7 @@ namespace Server
 		{
 			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
 			foreach (Player p in Players)
-				if (p != curPlayer) {
-					SendData(p.socket.GetStream(),data);
-				}
+				SendData(p.socket.GetStream(),data);
 		}
 
 		static void SendText (Player current, string text)
