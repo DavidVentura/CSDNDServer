@@ -59,7 +59,6 @@ namespace Server
 						curPlayer = AddPlayer (tcpClient,args[0]);
 						Console.WriteLine ("Player connected");	
 						SendInitialData (curPlayer);
-						SendNewPlayer(curPlayer);
 						break;
 					case "MOVE":
 					if (curPlayer.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
@@ -84,8 +83,7 @@ namespace Server
 			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
-
-			SendPlayers(p);
+			SendNewPlayer(p); //send the newly logged user to everyone else, and every logged user to the new one
 		}
 
 		static string LayerToString (LayerType t)
@@ -135,12 +133,15 @@ namespace Server
 		}
 		static void SendNewPlayer (Player curPlayer)
 		{
-			string data = String.Format("NPLR{0},{1},{2},{3}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
-			foreach (Player p in Players)
-				if (p != curPlayer) {
-				SendData(p.socket.GetStream(),data);
+			string data = String.Format("NPLR{0},{1},{2},{3},{4}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID,curPlayer.Name);
+			foreach (Player old in Players)
+				if (old != curPlayer) {
+					SendData(old,data); //send the new player to the old ones
+				SendData(curPlayer,String.Format("NPLR{0},{1},{2},{3},{4}",old.ID,old.position.X,old.position.Y,old.textureID,old.Name)); //and the old players to the new one
 				}
 		}
+
+
 		static void SendMovement (Player curPlayer)
 		{
 			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
@@ -149,12 +150,7 @@ namespace Server
 					SendData(p.socket.GetStream(),data);
 				}
 		}
-		static void SendPlayers (Player current)
-		{
-			foreach (Player p in Players)
-				if (p != current) 
-					SendData(current,String.Format("NPLR{0},{1},{2},{3}.{4}",p.ID,p.position.X,p.position.Y,p.textureID,p.Name));
-		}
+
 		static void SendText (Player current, string text)
 		{
 			foreach (Player p in Players)
