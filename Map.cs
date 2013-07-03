@@ -13,14 +13,18 @@ namespace Server
 		public static int Height {
 			get { return height; }
 		}
-
+		private static Coord SpawnPoint;
+		public static Coord Spawnpoint{
+			get { return SpawnPoint; }
+		}
 		private static MapLayer Ground;
 		private static MapLayer Objects;
 		private static MapLayer Blocks;
-		public static void Initialize (int h, int w)
+		public static void Initialize (int h, int w, Coord spawnpoint)
 		{
 			height = h;
 			width=w;
+			SpawnPoint = spawnpoint;
 		}
 
 		public static void AddLayer (MapLayer mapLayer)

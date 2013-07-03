@@ -36,11 +36,8 @@ namespace Server
 		private static void HandleClientComm (object client)
 		{
 			TcpClient tcpClient = (TcpClient)client;
-			Player curPlayer = AddPlayer(tcpClient);
-			Console.WriteLine("Player connected");
+			Player curPlayer=null;
 			NetworkStream clientStream = tcpClient.GetStream ();
-			SendInitialData(curPlayer);
-
 			byte[] message = new byte[4096];
 			int bytesRead;
 			while (true) {
@@ -58,14 +55,16 @@ namespace Server
 				string[] args = data.Substring (4).Split(',');
 
 				switch(header){
-					case "INIP": //initial position
-						curPlayer.position=new Coord(Int16.Parse(args[0]),Int16.Parse(args[1]));
+					case "LOGI": //login
+						curPlayer = AddPlayer (tcpClient,args[0]);
+						Console.WriteLine ("Player connected");	
+						SendInitialData (curPlayer);
 						SendNewPlayer(curPlayer);
 						break;
 					case "MOVE":
 					if (curPlayer.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
 						Network.SendData(curPlayer.socket.GetStream(),"POSI"+curPlayer.Position.X+","+curPlayer.Position.Y);
-						SendToOthers(curPlayer);
+						SendMovement(curPlayer);
 					}
 					break;
 					case "TALK":
@@ -81,6 +80,7 @@ namespace Server
 		static void SendInitialData (Player p)
 		{
 			NetworkStream clientStream = p.socket.GetStream();
+			SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4}",p.position.X,p.position.Y,p.textureID,p.ID,p.Name));
 			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
@@ -103,9 +103,9 @@ namespace Server
 			return data;
 		}
 
-		static Player AddPlayer (TcpClient socket)
+		static Player AddPlayer (TcpClient socket, string name)
 		{
-			Player p = new Player(socket,playerID++);
+			Player p = new Player(socket,playerID++,name);
 			Players.Add (p);
 			return p;
 		}
@@ -141,7 +141,7 @@ namespace Server
 				SendData(p.socket.GetStream(),data);
 				}
 		}
-		static void SendToOthers (Player curPlayer)
+		static void SendMovement (Player curPlayer)
 		{
 			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
 			foreach (Player p in Players)
@@ -153,7 +153,7 @@ namespace Server
 		{
 			foreach (Player p in Players)
 				if (p != current) 
-					SendData(current,String.Format("NPLR{0},{1},{2},{3}",p.ID,p.position.X,p.position.Y,p.textureID));
+					SendData(current,String.Format("NPLR{0},{1},{2},{3}.{4}",p.ID,p.position.X,p.position.Y,p.textureID,p.Name));
 		}
 		static void SendText (Player current, string text)
 		{

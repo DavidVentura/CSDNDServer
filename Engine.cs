@@ -48,11 +48,11 @@ namespace Server
 		public static void Initialize ()
 		{
 			LoadDatabase();
-			Map.Initialize(6,6);
 		}
 
 		private static void LoadDatabase ()
 		{
+			Console.WriteLine ("Started loading from DB");
 			IDbConnection dbcon;
 			IDataReader reader;
 			#if LINUX
@@ -63,25 +63,26 @@ namespace Server
 			dbcon.Open ();
 			IDbCommand dbcmd = dbcon.CreateCommand ();
 
-			dbcmd.CommandText = "SELECT WIDTH,HEIGHT FROM MAP WHERE ID=" + MAPID;
+			dbcmd.CommandText = "SELECT WIDTH,HEIGHT,SPAWNX,SPAWNY FROM MAP WHERE ID=" + MAPID;
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
-				Map.Initialize(reader.GetInt16 (0), reader.GetInt16 (1));
+				Map.Initialize(reader.GetInt16 (0), reader.GetInt16 (1), new Coord(reader.GetInt32(2),reader.GetInt16(3)));
 			} else {
 				return; //die
 			}
+			Console.WriteLine ("Map loaded");
 			dbcmd.Dispose ();
 			dbcmd.CommandText = "SELECT TYPE,DATA FROM LAYERS WHERE MAPID=" + MAPID;
 			reader = dbcmd.ExecuteReader ();
 			while (reader.Read ()) {
 				Map.AddLayer(ParseMapLayer ((LayerType)reader.GetInt16 (0),  6, 6, reader.GetString (1)));
 			}
-
+			Console.WriteLine ("Layers loaded");
 			GlobalTextures="TXTR"; //TODO: move this?
 			for (int i=0;i<textures.Count;i++)
 				GlobalTextures+=textures[i]+",";
 			GlobalTextures=GlobalTextures.TrimEnd(',');
-
+			Console.WriteLine ("Texture list loaded");
 			dbcmd.Dispose ();
 			reader.Close();
 			reader = null;
@@ -89,6 +90,7 @@ namespace Server
 			dbcmd = null;
 			dbcon.Close();
 			dbcon = null;
+			Console.WriteLine ("Finished loading");
 		}
 
 		private static MapLayer ParseMapLayer (LayerType type,int width, int height, string parseData)

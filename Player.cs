@@ -9,11 +9,11 @@ namespace Server
 		public int ID {
 			get { return id; }
 		}
-		private int texture=7; //FIXME: no puede ser  valor que no se haya cargado en el cliente de antemano
+		private int texture=7;//TODO: Load from databse
 		public int textureID {
 			get { return texture; }
 		}
-		private string name="Pepito";
+		private string name;
 		public string Name {
 			get { return name; }
 		}
@@ -24,11 +24,12 @@ namespace Server
 		public Coord Position {
 			get { return position; }
 		}
-		public Player (TcpClient t, int id)
+		public Player (TcpClient t, int id, string name)
 		{
 			this.id=id;
 			socket=t;
-			name+=id;
+			this.name=name;
+			position = Map.Spawnpoint;
 		}
 
 		public bool Move (Coord targetPos)
