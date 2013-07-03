@@ -9,7 +9,7 @@ namespace Server
 		public int ID {
 			get { return id; }
 		}
-		private int texture=7;//TODO: Load from databse
+		private int texture=8;//TODO: Load from databse
 		public int textureID {
 			get { return texture; }
 		}
