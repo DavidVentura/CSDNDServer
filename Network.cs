@@ -57,7 +57,7 @@ namespace Server
 				switch(header){
 					case "LOGI": //login
 						curPlayer = AddPlayer (tcpClient,args[0]);
-						Console.WriteLine ("Player connected");	
+						Console.WriteLine (String.Format("{0} connected",curPlayer.Name));	
 						SendInitialData (curPlayer);
 						break;
 					case "MOVE":
