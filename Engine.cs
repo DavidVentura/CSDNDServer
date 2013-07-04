@@ -77,7 +77,7 @@ namespace Server
 			dbcmd.CommandText = "SELECT TYPE,DATA FROM LAYERS WHERE MAPID=" + MAPID;
 			reader = dbcmd.ExecuteReader ();
 			while (reader.Read ()) {
-				Map.AddLayer(ParseMapLayer ((LayerType)reader.GetInt16 (0),  6, 6, reader.GetString (1)));
+				Map.AddLayer(ParseMapLayer ((LayerType)reader.GetInt16 (0),  Map.Width, Map.Height, reader.GetString (1)));
 			}
 			Console.WriteLine ("Layers loaded");
 			GlobalTextures="TXTR"; //TODO: move this?
