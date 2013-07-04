@@ -54,6 +54,11 @@ namespace Server
 				switch(header){
 					case "LOGI": //login
 						curPlayer = AddPlayer (tcpClient,args[0]);
+						if (curPlayer==null){
+							SendData(tcpClient.GetStream(), "ERROAlready logged in or inexistent user");
+							tcpClient.Close();
+							return;
+						}
 						Console.WriteLine (String.Format("{0} connected",curPlayer.Name));	
 						SendInitialData (curPlayer);
 						break;
@@ -103,6 +108,9 @@ namespace Server
 			Player p =  Engine.Login(name);
 			if (p==null) 
 				return null;
+			foreach(Player LoggedIn in Players)
+				if (LoggedIn.ID == p.ID)
+					return null;
 			p.socket=socket;
 			Players.Add (p);
 			return p;

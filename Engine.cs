@@ -117,9 +117,7 @@ namespace Server
 			dbcmd.CommandText = string.Format("SELECT ID,SPRITE FROM PLAYERS WHERE NAME='{0}'",name.ToUpper());
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
-				Player p = new Player(reader.GetInt32(0),name,reader.GetInt32(1));
-
-				return p;
+				return new Player(reader.GetInt32(0),name,reader.GetInt32(1));;
 			}
 			return null;
 		}
