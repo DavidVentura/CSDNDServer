@@ -18,6 +18,8 @@ namespace Server
 			get { return name; }
 		}
 
+		public bool noclip=false;
+
 		public TcpClient socket;
 		public Coord position;
 
@@ -34,7 +36,9 @@ namespace Server
 
 		public bool Move (Coord targetPos)
 		{
-			if (Map.ValidPosition (position+targetPos)) {
+			if (!Map.withinBounds(position+targetPos))
+				return false;
+			if (noclip || Map.ValidPosition (position+targetPos)) {
 				position += targetPos;
 				return true;
 			}

@@ -70,6 +70,9 @@ namespace Server
 					case "TALK":
 						SendText(curPlayer,args[0]);
 						break;
+					case "NOCL": //noclip
+						curPlayer.noclip=!curPlayer.noclip;
+						break;
 
 				}
 			}

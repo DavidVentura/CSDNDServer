@@ -65,7 +65,7 @@ namespace Server
 				return false;
 
 			foreach(Player p in Network.getPlayers)
-				if (p.Position==position)
+				if (p.Position==position && p.noclip==false)
 					return false;
 
 			if (Blocks.TileAt(position) >-1)
