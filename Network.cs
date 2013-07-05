@@ -83,7 +83,7 @@ namespace Server
 		static void SendInitialData (Player p)
 		{
 			NetworkStream clientStream = p.socket.GetStream();
-			SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4}",p.position.X,p.position.Y,p.textureID,p.ID,p.Name));
+			SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5}",p.position.X,p.position.Y,p.textureID,p.ID,p.Name,p.VisionRange));
 			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));

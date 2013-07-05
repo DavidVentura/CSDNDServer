@@ -9,6 +9,10 @@ namespace Server
 		public int ID {
 			get { return id; }
 		}
+		private int visionRange; //in tiles
+		public int VisionRange {
+			get { return visionRange; }
+		}
 		private int texture;
 		public int textureID {
 			get { return texture; }
@@ -19,17 +23,17 @@ namespace Server
 		}
 
 		public bool noclip=false;
-
 		public TcpClient socket;
 		public Coord position;
 
 		public Coord Position {
 			get { return position; }
 		}
-		public Player (int id, string name, int sprite)
+		public Player (int id, string name, int sprite, int visionrange)
 		{
 			this.id=id;
 			this.name=name;
+			visionRange = visionrange;
 			texture = sprite;
 			position = Map.Spawnpoint;
 		}
