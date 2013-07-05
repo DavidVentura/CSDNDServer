@@ -9,6 +9,12 @@ namespace Server
 		public int ID {
 			get { return id; }
 		}
+
+		private int size;
+		public int Size {
+			get { return size; }
+		}
+
 		private int visionRange; //in tiles
 		public int VisionRange {
 			get { return visionRange; }
@@ -29,8 +35,9 @@ namespace Server
 		public Coord Position {
 			get { return position; }
 		}
-		public Player (int id, string name, int sprite, int visionrange)
+		public Player (int id, string name, int sprite, int visionrange, int size)
 		{
+			this.size = size;
 			this.id=id;
 			this.name=name;
 			visionRange = visionrange;
@@ -40,13 +47,18 @@ namespace Server
 
 		public bool Move (Coord targetPos)
 		{
-			if (!Map.withinBounds(position+targetPos))
+			if (!Map.withinBounds (position + targetPos))
 				return false;
-			if (noclip || Map.ValidPosition (position+targetPos)) {
-				position += targetPos;
-				return true;
-			}
-			return false;
+			if (!noclip) 
+			for (int x = 0; x < size; x++) 
+				for (int y = 0; y < size; y++) {
+					if (!Map.ValidPosition (position+targetPos+ new Coord(x,y),this)) {
+						return false;
+					}
+				}
+
+			position += targetPos;
+			return true;
 		}
 
 	}

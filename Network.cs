@@ -83,7 +83,7 @@ namespace Server
 		static void SendInitialData (Player p)
 		{
 			NetworkStream clientStream = p.socket.GetStream();
-			SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5}",p.position.X,p.position.Y,p.textureID,p.ID,p.Name,p.VisionRange));
+			SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",p.position.X,p.position.Y,p.textureID,p.ID,p.Name,p.VisionRange,p.Size));
 			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
@@ -144,11 +144,11 @@ namespace Server
 		}
 		static void SendNewPlayer (Player curPlayer)
 		{
-			string data = String.Format("NPLR{0},{1},{2},{3},{4}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID,curPlayer.Name);
+			string data = String.Format("NPLR{0},{1},{2},{3},{4},{5}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID,curPlayer.Name,curPlayer.Size);
 			foreach (Player old in Players)
 				if (old != curPlayer) {
 					SendData(old,data); //send the new player to the old ones
-				SendData(curPlayer,String.Format("NPLR{0},{1},{2},{3},{4}",old.ID,old.position.X,old.position.Y,old.textureID,old.Name)); //and the old players to the new one
+				SendData(curPlayer,String.Format("NPLR{0},{1},{2},{3},{4},{5}",old.ID,old.position.X,old.position.Y,old.textureID,old.Name,old.Size)); //and the old players to the new one
 				}
 		}
 

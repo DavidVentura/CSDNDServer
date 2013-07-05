@@ -73,6 +73,23 @@ namespace Server
 			return true;
 
 		}
+		public static bool ValidPosition (Coord position, Player moving)
+		{
+			if (!withinBounds (position))
+				return false;
+
+			foreach (Player p in Network.getPlayers)
+				for (int x = 0; x < p.Size; x++) 
+					for (int y = 0; y < p.Size; y++) {
+						if (p.Position+new Coord(x,y) == position && p.noclip == false && moving.ID != p.ID)
+							return false;
+					}
+
+			if (Blocks.TileAt(position) >-1)
+				return false;
+			return true;
+
+		}
 
 	}
 }

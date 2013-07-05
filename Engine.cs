@@ -113,10 +113,10 @@ namespace Server
 		public static Player Login (string name)
 		{
 			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID,SPRITE,VISIONRANGE FROM PLAYERS WHERE NAME='{0}'",name.ToUpper());
+			dbcmd.CommandText = string.Format("SELECT ID,SPRITE,VISIONRANGE,SIZE FROM PLAYERS WHERE NAME='{0}'",name.ToUpper());
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
-				return new Player(reader.GetInt32(0),name,reader.GetInt32(1),reader.GetInt32(2));
+				return new Player(reader.GetInt32(0),name,reader.GetInt32(1),reader.GetInt32(2),reader.GetInt32(3));
 			}
 			return null;
 		}
