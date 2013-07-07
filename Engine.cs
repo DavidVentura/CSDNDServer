@@ -110,16 +110,27 @@ namespace Server
 			dbcon.Close();
 			dbcon = null;
 		}
+
 		public static Player Login (string name)
 		{
+			int id=0;
+			List<Character> chars = new List<Character>();
 			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID,SPRITE,VISIONRANGE,SIZE FROM PLAYERS WHERE NAME='{0}'",name.ToUpper());
+			dbcmd.CommandText = string.Format("SELECT ID FROM PLAYER WHERE NAME='{0}'",name.ToUpper());
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
-				return new Player(reader.GetInt32(0),name,reader.GetInt32(1),reader.GetInt32(2),reader.GetInt32(3));
+				id = reader.GetInt32(0);
 			}
-			return null;
+			if (id==0) return null;
+			dbcmd = dbcon.CreateCommand();
+			dbcmd.CommandText = string.Format("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE FROM CHARACTERS WHERE PLAYER='{0}'",id);
+			reader = dbcmd.ExecuteReader ();
+			while (reader.Read ()) {
+				chars.Add(new Character(reader.GetInt16(0),reader.GetString(1),reader.GetInt16(2),reader.GetInt16(3),reader.GetInt16(4)));
+			}
+			return new Player(id,chars,name);
 		}
+
 	}
 }
 

@@ -33,10 +33,11 @@ namespace Server
 		private static void HandleClientComm (object client)
 		{
 			TcpClient tcpClient = (TcpClient)client;
-			Player curPlayer=null;
+			Character curChar=null;
+			Player curPlayer = null;
 			NetworkStream clientStream = tcpClient.GetStream ();
 			byte[] message = new byte[4096];
-			int bytesRead;
+			int bytesRead,curCharIndex=0;
 			while (true) {
 				bytesRead=0;
 				try{
@@ -51,6 +52,7 @@ namespace Server
 				string header = data.Substring (0,4);
 				string[] args = data.Substring (4).Split(',');
 
+
 				switch(header){
 					case "LOGI": //login
 						curPlayer = AddPlayer (tcpClient,args[0]);
@@ -61,17 +63,25 @@ namespace Server
 						}
 						Console.WriteLine (String.Format("{0} connected",curPlayer.Name));	
 						SendInitialData (curPlayer);
+						curChar = curPlayer.chars[curCharIndex];
 						break;
 					case "MOVE":
-					if (curPlayer.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
-						SendMovement(curPlayer);
+					if (curChar.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
+						SendMovement(curChar);
 					}
 					break;
 					case "TALK":
-						SendText(curPlayer,args[0]);
+						SendText(curChar,args[0]);
 						break;
 					case "NOCL": //noclip
-						curPlayer.noclip=!curPlayer.noclip;
+						curChar.noclip=!curChar.noclip;
+						break;
+					case "SWCH": //switch character
+						curCharIndex++;
+						if(curCharIndex>=curPlayer.chars.Count)
+							curCharIndex=0;
+						SendData(curPlayer,"SWCH"+curCharIndex);
+						curChar = curPlayer.chars[curCharIndex];
 						break;
 
 				}
@@ -83,7 +93,9 @@ namespace Server
 		static void SendInitialData (Player p)
 		{
 			NetworkStream clientStream = p.socket.GetStream();
-			SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",p.position.X,p.position.Y,p.textureID,p.ID,p.Name,p.VisionRange,p.Size));
+			foreach(Character c in p.chars)
+				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.position.X,c.position.Y,c.textureID,c.ID,c.Name,c.VisionRange,c.Size));
+
 			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
@@ -136,35 +148,43 @@ namespace Server
 		}
 		static void RemovePlayer (Player p)
 		{
-			foreach(Player P in Players)
-				if (P!=p)
-					SendData(P,String.Format("RPLR{0}",p.ID));
-			Console.WriteLine(String.Format("{0} Disconnected",p.Name));
+			foreach (Character c in p.chars) {
+				foreach (Player curPlayer in Players) {
+					if (curPlayer != p)
+						SendData (curPlayer, String.Format ("RPLR{0}", c.ID));
+				}
+			}
+			Console.WriteLine(String.Format("{0} Disconnected",p.ID));
 			Players.Remove(p);
 		}
-		static void SendNewPlayer (Player curPlayer)
+		static void SendNewPlayer (Player newPlayer)
 		{
-			string data = String.Format("NPLR{0},{1},{2},{3},{4},{5}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID,curPlayer.Name,curPlayer.Size);
-			foreach (Player old in Players)
-				if (old != curPlayer) {
-					SendData(old,data); //send the new player to the old ones
-				SendData(curPlayer,String.Format("NPLR{0},{1},{2},{3},{4},{5}",old.ID,old.position.X,old.position.Y,old.textureID,old.Name,old.Size)); //and the old players to the new one
+			//TODO: wat
+			foreach (Character c in newPlayer.chars) {
+				string data = String.Format ("NPLR{0},{1},{2},{3},{4},{5}", c.ID, c.position.X, c.position.Y, c.textureID, c.Name, c.Size);
+				foreach (Player p in Players){
+					if (p!=newPlayer){
+						foreach (Character old in p.chars)
+							if (old != c) {
+								SendData (p, data); //send the new player to the old ones
+								SendData (newPlayer, String.Format ("NPLR{0},{1},{2},{3},{4},{5}", old.ID, old.position.X, old.position.Y, old.textureID, old.Name, old.Size)); //and the old players to the new one
+							}
+					}
 				}
+			}
 		}
 
-
-		static void SendMovement (Player curPlayer)
+		static void SendMovement (Character curPlayer)
 		{
 			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
 			foreach (Player p in Players)
 				SendData(p.socket.GetStream(),data);
 		}
 
-		static void SendText (Player current, string text)
+		static void SendText (Character current, string text)
 		{
 			foreach (Player p in Players)
-				if (p != current) 
-					SendData(current,String.Format("TALK{0},{1}",p.Name,text));
+					SendData(p,String.Format("TALK{0},{1}",current.Name,text));
 		}
 
 

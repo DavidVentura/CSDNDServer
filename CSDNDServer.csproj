@@ -47,14 +47,12 @@
     <Compile Include="Map.cs" />
     <Compile Include="MapLayer.cs" />
     <Compile Include="Network.cs" />
-    <Compile Include="Player.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Character.cs" />
+    <Compile Include="Player.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Content\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
