@@ -76,6 +76,10 @@ namespace Server
 					case "NOCL": //noclip
 						curChar.noclip=!curChar.noclip;
 						break;
+					case "VISI": //change visibility
+						curChar.invisible =!curChar.invisible;
+						SendData("VISI"+curChar.ID);
+						break;
 					case "SWCH": //switch character
 						curCharIndex++;
 						if(curCharIndex>=curPlayer.chars.Count)

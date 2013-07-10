@@ -10,11 +10,13 @@ namespace Server
 		public List<Character> chars = new List<Character>();
 		public int ID;
 		public string Name;
-		public Player (int id, List<Character> chars, string name)
+		public bool isDM=false;
+		public Player (int id, List<Character> chars, string name, bool IsDM)
 		{
 			this.chars=chars;
 			this.ID=id;
 			this.Name = name;
+			this.isDM=IsDM;
 		}
 	}
 }

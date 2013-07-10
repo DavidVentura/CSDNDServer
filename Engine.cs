@@ -114,12 +114,14 @@ namespace Server
 		public static Player Login (string name)
 		{
 			int id=0;
+			bool dm=false;
 			List<Character> chars = new List<Character>();
 			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID FROM PLAYER WHERE NAME='{0}'",name.ToUpper());
+			dbcmd.CommandText = string.Format("SELECT ID,DM FROM PLAYER WHERE NAME='{0}'",name.ToUpper());
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
 				id = reader.GetInt32(0);
+				dm = reader.GetBoolean(1);
 			}
 			if (id==0) return null;
 			dbcmd = dbcon.CreateCommand();
@@ -128,7 +130,7 @@ namespace Server
 			while (reader.Read ()) {
 				chars.Add(new Character(reader.GetInt16(0),reader.GetString(1),reader.GetInt16(2),reader.GetInt16(3),reader.GetInt16(4)));
 			}
-			return new Player(id,chars,name);
+			return new Player(id,chars,name,dm);
 		}
 
 	}

@@ -34,6 +34,12 @@ namespace Server
 			set { NoClip = value; }
 		}
 
+		private bool Invisible=false;
+		public bool invisible {
+			get { return Invisible; }
+			set { Invisible = value; }
+		}
+
 		public Coord position;
 
 		public Coord Position {
