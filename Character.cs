@@ -40,10 +40,11 @@ namespace Server
 			set { Invisible = value; }
 		}
 
-		public Coord position;
+		private Coord position;
 
 		public Coord Position {
 			get { return position; }
+			set { position = value; }
 		}
 		public Character (int id, string name, int sprite, int visionrange, int size)
 		{
@@ -61,12 +62,9 @@ namespace Server
 				return false;
 			if (!noclip) 
 			for (int x = 0; x < size; x++) 
-				for (int y = 0; y < size; y++) {
-					if (!Map.ValidPosition (position+targetPos+ new Coord(x,y),this)) {
+				for (int y = 0; y < size; y++)
+					if (!Map.ValidPosition (position+targetPos+ new Coord(x,y),this))
 						return false;
-					}
-				}
-
 			position += targetPos;
 			return true;
 		}

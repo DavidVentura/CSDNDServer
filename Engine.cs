@@ -47,6 +47,7 @@ namespace Server
 		private static IDbConnection dbcon;
 		private static IDataReader reader;
 		private static IDbCommand dbcmd;
+		private static int curMobID=2000;
 
 		public static void Initialize ()
 		{
@@ -132,6 +133,27 @@ namespace Server
 			}
 			return new Player(id,chars,name,dm);
 		}
+		public static Character GetMob (int id, int x, int y)
+		{
+			Character ret=null;
+			string name;
+			int sprite,visionrange,size;
+			Coord pos = new Coord(x,y);
+			if (!Map.withinBounds(pos)) return null;
+			dbcmd = dbcon.CreateCommand();
+			dbcmd.CommandText = string.Format("SELECT NAME,SPRITE,SIZE,VISIONRANGE FROM MOBS WHERE ID='{0}'",id);
+			reader = dbcmd.ExecuteReader ();
+			if (reader.Read ()) {
+				name = reader.GetString(0);
+				sprite = reader.GetInt32(1);
+				size = reader.GetInt32(2);
+				visionrange = reader.GetInt32(3);
+				ret = new Character(curMobID++,name,sprite,visionrange,size);
+				ret.Position= pos;
+			}
+			return ret;
+		}
+
 
 	}
 }

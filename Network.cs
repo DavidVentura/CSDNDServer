@@ -52,7 +52,6 @@ namespace Server
 				string header = data.Substring (0,4);
 				string[] args = data.Substring (4).Split(',');
 
-
 				switch(header){
 					case "LOGI": //login
 						curPlayer = AddPlayer (tcpClient,args[0]);
@@ -63,12 +62,21 @@ namespace Server
 						}
 						Console.WriteLine (String.Format("{0} connected",curPlayer.Name));	
 						SendInitialData (curPlayer);
-						curChar = curPlayer.chars[curCharIndex];
+						if (curPlayer.chars.Count>0) //DM might have 0 players
+							curChar = curPlayer.chars[curCharIndex];
+						break;
+					case "SPWN"://spawn mob, ID,x ,y
+						Character mob = Engine.GetMob(Int32.Parse(args[0]),Int32.Parse(args[1]),Int32.Parse(args[2]));
+						if (mob ==null) return; //invalid
+						curPlayer.chars.Add(mob);
+						if (curChar==null)
+							curChar = curPlayer.chars[curCharIndex];
+						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.Position.X,mob.Position.Y,mob.textureID,mob.ID,mob.Name,mob.VisionRange,mob.Size));
+						SendNewPlayer(curPlayer);
 						break;
 					case "MOVE":
-					if (curChar.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1])))){
-						SendMovement(curChar);
-					}
+					if (curChar.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1]))))
+						SendMovement(curChar);					
 					break;
 					case "TALK":
 						SendText(curChar,args[0]);
@@ -98,7 +106,7 @@ namespace Server
 		{
 			NetworkStream clientStream = p.socket.GetStream();
 			foreach(Character c in p.chars)
-				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.position.X,c.position.Y,c.textureID,c.ID,c.Name,c.VisionRange,c.Size));
+				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.Position.X,c.Position.Y,c.textureID,c.ID,c.Name,c.VisionRange,c.Size));
 
 			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
@@ -163,24 +171,20 @@ namespace Server
 		}
 		static void SendNewPlayer (Player newPlayer)
 		{
-			//TODO: wat
-			foreach (Character c in newPlayer.chars) {
-				string data = String.Format ("NPLR{0},{1},{2},{3},{4},{5}", c.ID, c.position.X, c.position.Y, c.textureID, c.Name, c.Size);
-				foreach (Player p in Players){
-					if (p!=newPlayer){
-						foreach (Character old in p.chars)
-							if (old != c) {
-								SendData (p, data); //send the new player to the old ones
-								SendData (newPlayer, String.Format ("NPLR{0},{1},{2},{3},{4},{5}", old.ID, old.position.X, old.position.Y, old.textureID, old.Name, old.Size)); //and the old players to the new one
-							}
-					}
+			foreach (Player p in Players)
+				if (p!=newPlayer){
+					foreach (Character c in newPlayer.chars)
+						SendData (p, String.Format ("NPLR{0},{1},{2},{3},{4},{5}", c.ID, c.Position.X, c.Position.Y, c.textureID, c.Name, c.Size));
+						//send the new player's chars to the old players
+					foreach (Character old in p.chars)
+						SendData (newPlayer, String.Format ("NPLR{0},{1},{2},{3},{4},{5}", old.ID, old.Position.X, old.Position.Y, old.textureID, old.Name, old.Size)); 
+						//send the old player's chars to the new one
 				}
-			}
 		}
 
 		static void SendMovement (Character curPlayer)
 		{
-			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.position.X,curPlayer.position.Y,curPlayer.textureID);
+			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.Position.X,curPlayer.Position.Y,curPlayer.textureID);
 			foreach (Player p in Players)
 				SendData(p.socket.GetStream(),data);
 		}
