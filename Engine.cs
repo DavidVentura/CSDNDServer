@@ -40,7 +40,7 @@ namespace Server
 
 	public static class Engine
 	{
-		public static string GlobalTextures;
+		//public static string GlobalTextures;
 		private static List<int> textures = new List<int>();
 		private const string ConnectionString = "URI=file:database.db";
 		private const int MAPID = 1;
@@ -77,34 +77,13 @@ namespace Server
 			dbcmd.Dispose ();
 			dbcmd.CommandText = "SELECT TYPE,DATA FROM LAYERS WHERE MAPID=" + MAPID;
 			reader = dbcmd.ExecuteReader ();
-			while (reader.Read ()) {
-				Map.AddLayer(ParseMapLayer ((LayerType)reader.GetInt16 (0),  Map.Width, Map.Height, reader.GetString (1)));
-			}
+			while (reader.Read ()) 
+				Map.ParseMapLayer((LayerType)reader.GetInt16 (0),  Map.Width, Map.Height, reader.GetString (1));
 			Console.WriteLine ("Layers loaded");
-			GlobalTextures="TXTR"; //TODO: move this?
-			for (int i=0;i<textures.Count;i++)
-				GlobalTextures+=textures[i]+",";
-			GlobalTextures=GlobalTextures.TrimEnd(',');
-			Console.WriteLine ("Texture list loaded");
+
 			Console.WriteLine ("Finished loading");
 		}
 
-		private static MapLayer ParseMapLayer (LayerType type,int width, int height, string parseData)
-		{
-			int[,] data = new int[width, height];
-			string[] rows = parseData.Split ('|');
-			string[] cols;
-			for (int y =0; y < rows.Length;y++) {
-				cols = rows[y].Split(',');
-				for (int x = 0; x < cols.Length;x++) {
-					data[x,y] = Int16.Parse(cols[x]);
-					if (!textures.Contains(data[x,y]))
-						if (data[x,y]!=0)
-							textures.Add (data[x,y]);
-				}
-			}
-			return new MapLayer(type,width,height,data);
-		}
 		public static void Unload() { //TODO:Call this
 			reader.Close();
 			reader = null;

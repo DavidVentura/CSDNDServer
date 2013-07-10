@@ -74,6 +74,10 @@ namespace Server
 						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.Position.X,mob.Position.Y,mob.textureID,mob.ID,mob.Name,mob.VisionRange,mob.Size));
 						SendNewPlayer(curPlayer);
 						break;
+					case "SOBJ": //set the TILE, blocking?, on x,y
+						Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]),Int16.Parse(args[3]));
+						SendData(String.Format("SOBJ{0},{1},{2}",args[0],args[2],args[3])); //id and pos, blocking is handled server-side
+					break;
 					case "MOVE":
 					if (curChar.Move(new Coord(Int16.Parse(args[0]),Int16.Parse(args[1]))))
 						SendMovement(curChar);					
@@ -108,7 +112,6 @@ namespace Server
 			foreach(Character c in p.chars)
 				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.Position.X,c.Position.Y,c.textureID,c.ID,c.Name,c.VisionRange,c.Size));
 
-			SendData(clientStream,Engine.GlobalTextures);
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
 			SendNewPlayer(p); //send the newly logged user to everyone else, and every logged user to the new one
