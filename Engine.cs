@@ -48,6 +48,20 @@ namespace Server
 		private static IDataReader reader;
 		private static IDbCommand dbcmd;
 		private static int curMobID=2000;
+		private static Random rnd=new Random();
+
+		public static int D10 {
+			get { return rnd.Next (1, 10); }
+		}
+		public static int D6 {
+			get { return rnd.Next (1, 6); }
+		}
+		public static int D12 {
+			get { return rnd.Next (1, 12); }
+		}
+		public static int D20 {
+			get { return rnd.Next (1, 20); }
+		}
 
 		public static void Initialize ()
 		{
@@ -105,10 +119,12 @@ namespace Server
 			}
 			if (id==0) return null;
 			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE FROM CHARACTERS WHERE PLAYER='{0}'",id);
+			dbcmd.CommandText = string.Format("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE,WILL,REFLEX,FORTITUDE,CHA,WIS,INT,CON,DEX,STR,INITIATIVE FROM CHARACTERS WHERE PLAYER='{0}'",id);
 			reader = dbcmd.ExecuteReader ();
 			while (reader.Read ()) {
-				chars.Add(new Character(reader.GetInt16(0),reader.GetString(1),reader.GetInt16(2),reader.GetInt16(3),reader.GetInt16(4)));
+				chars.Add(new Character(reader.GetInt16(0),reader.GetString(1),reader.GetInt16(2),reader.GetInt16(3),reader.GetInt16(4), //up to size
+				                        reader.GetInt16(5),reader.GetInt16(6),reader.GetInt16(7), //will, reflex,fort
+				                        reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14)));
 			}
 			return new Player(id,chars,name,dm);
 		}
@@ -120,14 +136,18 @@ namespace Server
 			Coord pos = new Coord(x,y);
 			if (!Map.withinBounds(pos)) return null;
 			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT NAME,SPRITE,SIZE,VISIONRANGE FROM MOBS WHERE ID='{0}'",id);
+			dbcmd.CommandText = string.Format("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE,WILL,REFLEX,FORTITUDE,CHA,WIS,INT,CON,DEX,STR,INITIATIVE FROM MOBS WHERE ID='{0}'",id);
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
-				name = reader.GetString(0);
-				sprite = reader.GetInt32(1);
-				size = reader.GetInt32(2);
+				//don't need the ID
+				name = reader.GetString(1);
+				sprite = reader.GetInt32(2);
 				visionrange = reader.GetInt32(3);
-				ret = new Character(curMobID++,name,sprite,visionrange,size);
+				size = reader.GetInt32(4);
+
+				ret = new Character(curMobID++,name,sprite,visionrange,size,
+				                    reader.GetInt16(5),reader.GetInt16(6),reader.GetInt16(7), //will, reflex,fort
+				                    reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14));
 				ret.Position= pos;
 			}
 			return ret;

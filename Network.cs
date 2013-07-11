@@ -101,6 +101,18 @@ namespace Server
 						SendData(curPlayer,"SWCH"+curCharIndex);
 						curChar = curPlayer.chars[curCharIndex];
 						break;
+					case "INIT": //initiative
+						SendInitiative ();
+						break;
+					case "REFL": //reflexes
+						SendReflexes ();
+						break;
+					case "FORT":
+						SendFort ();
+						break;
+					case "WILL":
+						SendWill ();
+						break;
 
 				}
 			}
@@ -202,6 +214,34 @@ namespace Server
 					SendData(p,String.Format("TALK{0},{1}",current.Name,text));
 		}
 
+		static void SendInitiative() {
+			string data = "TEXTInitiatives:\n";
+			foreach (Player p in Players)
+				foreach (Character c in p.chars)
+					data += c.Name + ": "+c.RollInitiative()+"\n";
+			SendData (data);
+		}
+		static void SendReflexes() {
+			string data = "TEXTReflexes:\n";
+			foreach (Player p in Players)
+				foreach (Character c in p.chars)
+					data += c.Name + ": "+c.RollReflexes() +"\n";
+			SendData (data);
+		}
+		static void SendFort() {
+			string data = "TEXTFortitude:\n";
+			foreach (Player p in Players)
+				foreach (Character c in p.chars)
+					data += c.Name + ": "+c.RollFort()+"\n";
+			SendData (data);
+		}
+		static void SendWill() {
+			string data = "TEXTWill:\n";
+			foreach (Player p in Players)
+				foreach (Character c in p.chars)
+					data += c.Name + ": "+c.RollWill()+"\n";
+			SendData (data);
+		}
 
 	}
 }

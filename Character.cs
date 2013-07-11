@@ -1,8 +1,20 @@
 using System.Net.Sockets;
 
-
 namespace Server
 {
+	public struct Saves {
+		public int REF;
+		public int FORT;
+		public int WILL;
+	}
+	public struct Attributes {
+		public int STR;
+		public int DEX;
+		public int CON;
+		public int INT;
+		public int WIS;
+		public int CHA;
+	}
 	public class Character
 	{
 		private int id=1;
@@ -46,11 +58,30 @@ namespace Server
 			get { return position; }
 			set { position = value; }
 		}
-		public Character (int id, string name, int sprite, int visionrange, int size)
+
+		public Saves saves;
+		public Attributes attributes;
+		public int initiative;
+		public Character (int id, string name, int sprite, int visionrange, int size,
+		                  int will,int reflex,int fortitude,int cha,int wis,int intel,int con,int dex,int str,int init)
 		{
+			saves.FORT = fortitude;
+			saves.REF = reflex;
+			saves.WILL = will;
+
+			attributes.CHA = cha;
+			attributes.CON = con;
+			attributes.INT = intel;
+			attributes.WIS = wis;
+			attributes.STR = str;
+			attributes.DEX = dex;
+
+			initiative = init;
+
 			this.size = size;
 			this.id=id;
 			this.name=name;
+			
 			visionRange = visionrange;
 			texture = sprite;
 			position = Map.Spawnpoint;
@@ -61,7 +92,7 @@ namespace Server
 			if (!Map.withinBounds (position + targetPos))
 				return false;
 			if (!noclip) 
-			for (int x = 0; x < size; x++) 
+			for (int x = 0; x < size; x++)
 				for (int y = 0; y < size; y++)
 					if (!Map.ValidPosition (position+targetPos+ new Coord(x,y),this))
 						return false;
@@ -69,6 +100,26 @@ namespace Server
 			return true;
 		}
 
+		public string RollInitiative ()
+		{
+			int val = Engine.D10;
+			return val + " (d10) " + initiative + "(init) = " + (val + initiative);
+		}
+		public string RollReflexes ()
+		{
+			int val = Engine.D20;
+			return val + " (d20) " + saves.REF + "(Reflexes) = " + (val + saves.REF);
+		}
+		public string RollFort ()
+		{
+			int val = Engine.D20;
+			return val + " (d20) " + saves.FORT + "(Fortitude) = " + (val + saves.FORT);
+		}
+		public string RollWill ()
+		{
+			int val = Engine.D20;
+			return val + " (d20) " + saves.WILL + "(Will) = " + (val + saves.WILL);
+		}
 	}
 }
 
