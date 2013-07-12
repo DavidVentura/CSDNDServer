@@ -103,22 +103,22 @@ namespace Server
 		public string RollInitiative ()
 		{
 			int val = Engine.D10;
-			return val + " (d10) " + initiative + "(init) = " + (val + initiative);
+			return val + "(d10)+" + initiative + "=" + (val + initiative);
 		}
 		public string RollReflexes ()
 		{
 			int val = Engine.D20;
-			return val + " (d20) " + saves.REF + "(Reflexes) = " + (val + saves.REF);
+			return val + "(d20)+" + saves.REF + "=" + (val + saves.REF);
 		}
 		public string RollFort ()
 		{
 			int val = Engine.D20;
-			return val + " (d20) " + saves.FORT + "(Fortitude) = " + (val + saves.FORT);
+			return val + "(d20)+" + saves.FORT + "=" + (val + saves.FORT);
 		}
 		public string RollWill ()
 		{
 			int val = Engine.D20;
-			return val + " (d20) " + saves.WILL + "(Will) = " + (val + saves.WILL);
+			return val + "(d20)+" + saves.WILL + "=" + (val + saves.WILL);
 		}
 	}
 }

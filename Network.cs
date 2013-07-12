@@ -215,28 +215,28 @@ namespace Server
 		}
 
 		static void SendInitiative() {
-			string data = "TEXTInitiatives:\n";
+			string data = "MESSInitiatives:\n";
 			foreach (Player p in Players)
 				foreach (Character c in p.chars)
 					data += c.Name + ": "+c.RollInitiative()+"\n";
 			SendData (data);
 		}
 		static void SendReflexes() {
-			string data = "TEXTReflexes:\n";
+			string data = "MESSReflexes:\n";
 			foreach (Player p in Players)
 				foreach (Character c in p.chars)
 					data += c.Name + ": "+c.RollReflexes() +"\n";
 			SendData (data);
 		}
 		static void SendFort() {
-			string data = "TEXTFortitude:\n";
+			string data = "MESSFortitude:\n";
 			foreach (Player p in Players)
 				foreach (Character c in p.chars)
 					data += c.Name + ": "+c.RollFort()+"\n";
 			SendData (data);
 		}
 		static void SendWill() {
-			string data = "TEXTWill:\n";
+			string data = "MESSWill:\n";
 			foreach (Player p in Players)
 				foreach (Character c in p.chars)
 					data += c.Name + ": "+c.RollWill()+"\n";
