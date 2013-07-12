@@ -69,8 +69,6 @@ namespace Server
 						Character mob = Engine.GetMob(Int32.Parse(args[0]),Int32.Parse(args[1]),Int32.Parse(args[2]));
 						if (mob ==null) return; //invalid
 						curPlayer.chars.Add(mob);
-						if (curChar==null)
-							curChar = curPlayer.chars[curCharIndex];
 						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.Position.X,mob.Position.Y,mob.textureID,mob.ID,mob.Name,mob.VisionRange,mob.Size));
 						SendNewPlayer(curPlayer);
 						break;
@@ -112,6 +110,10 @@ namespace Server
 						break;
 					case "WILL":
 						SendWill ();
+						break;
+					case "DMMD": //DM mode
+						curChar = null;
+						curCharIndex = 0;
 						break;
 
 				}
@@ -210,8 +212,13 @@ namespace Server
 
 		static void SendText (Character current, string text)
 		{
+			string n;
+			if (current == null)
+				n = "DM";
+			else
+				n = current.Name;
 			foreach (Player p in Players)
-					SendData(p,String.Format("TALK{0},{1}",current.Name,text));
+					SendData(p,String.Format("TALK{0},{1}",n,text));
 		}
 
 		static void SendInitiative() {
