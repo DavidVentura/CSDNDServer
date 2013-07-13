@@ -6,7 +6,6 @@ namespace Server
 {
 	public static class Map
 	{
-		private static string serializeddata;
 		static int height, width;
 		public static int Width {
 			get { return width; }

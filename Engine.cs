@@ -40,8 +40,6 @@ namespace Server
 
 	public static class Engine
 	{
-		//public static string GlobalTextures;
-		private static List<int> textures = new List<int>();
 		private const string ConnectionString = "URI=file:database.db";
 		private const int MAPID = 1;
 		private static IDbConnection dbcon;

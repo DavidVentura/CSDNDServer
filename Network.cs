@@ -17,7 +17,7 @@ namespace Server
 		}
 		public static void Init ()
 		{
-			tcpListener = new TcpListener(IPAddress.Any,3000);
+			tcpListener = new TcpListener(IPAddress.Any,30000);
 			Console.WriteLine ("Server up");
 			new Thread(new ThreadStart(ListenForClients)).Start();
 			Console.ReadLine();
@@ -37,7 +37,7 @@ namespace Server
 			Player curPlayer = null;
 			NetworkStream clientStream = tcpClient.GetStream ();
 			byte[] message = new byte[4096];
-			int bytesRead,curCharIndex=0;
+			int bytesRead;
 			while (true) {
 				bytesRead=0;
 				try{
@@ -61,15 +61,20 @@ namespace Server
 							return;
 						}
 						Console.WriteLine (String.Format("{0} connected",curPlayer.Name));	
+
 						SendInitialData (curPlayer);
-						if (curPlayer.chars.Count>0) //DM might have 0 players
-							curChar = curPlayer.chars[curCharIndex];
+						if (curPlayer.chars.Count > 0){
+							SendData(clientStream, "SWCH" + curPlayer.chars[0].ID);//assign the first player upon logging in
+							curChar=curPlayer.chars[0];
+						}
 						break;
 					case "SPWN"://spawn mob, ID,x ,y
 						Character mob = Engine.GetMob(Int32.Parse(args[0]),Int32.Parse(args[1]),Int32.Parse(args[2]));
-						if (mob ==null) return; //invalid
+						if (mob ==null) break; //invalid
+						if (!Map.ValidPosition(mob.Position,mob)) break;
 						curPlayer.chars.Add(mob);
-						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.Position.X,mob.Position.Y,mob.textureID,mob.ID,mob.Name,mob.VisionRange,mob.Size));
+
+						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.ID,mob.Position.X,mob.Position.Y,mob.textureID,mob.Name,mob.Size,mob.VisionRange));
 						SendNewPlayer(curPlayer);
 						break;
 					case "SOBJ": //set the TILE, blocking?, on x,y
@@ -93,11 +98,12 @@ namespace Server
 						SendData("VISI"+curChar.ID);
 						break;
 					case "SWCH": //switch character
-						curCharIndex++;
-						if(curCharIndex>=curPlayer.chars.Count)
-							curCharIndex=0;
-						SendData(curPlayer,"SWCH"+curCharIndex);
-						curChar = curPlayer.chars[curCharIndex];
+						foreach (Character c in curPlayer.chars)
+							if (c.ID == Int32.Parse(args[0])){
+								SendData(curPlayer,"SWCH"+c.ID);
+								curChar=c;
+								break;
+							}
 						break;
 					case "INIT": //initiative
 						SendInitiative ();
@@ -113,7 +119,6 @@ namespace Server
 						break;
 					case "DMMD": //DM mode
 						curChar = null;
-						curCharIndex = 0;
 						break;
 
 				}
@@ -126,7 +131,8 @@ namespace Server
 		{
 			NetworkStream clientStream = p.socket.GetStream();
 			foreach(Character c in p.chars)
-				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.Position.X,c.Position.Y,c.textureID,c.ID,c.Name,c.VisionRange,c.Size));
+				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.ID,c.Position.X,c.Position.Y,c.textureID,c.Name,c.Size,c.VisionRange));
+
 
 			if(p.isDM)
 				SendData(clientStream,"DMOK");
@@ -176,18 +182,20 @@ namespace Server
 		}
 		static void SendData (string data)
 		{
-			foreach(Player p in Players)
-				SendData(p.socket.GetStream(),data);
+			foreach (Player p in Players) {
+				if (p.socket.Connected)
+					SendData (p.socket.GetStream (), data);
+			}
 		}
 		static void RemovePlayer (Player p)
 		{
-			foreach (Character c in p.chars) {
-				foreach (Player curPlayer in Players) {
+			foreach (Character c in p.chars)
+				foreach (Player curPlayer in Players)
 					if (curPlayer != p)
-						SendData (curPlayer, String.Format ("RPLR{0}", c.ID));
-				}
-			}
-			Console.WriteLine(String.Format("{0} Disconnected",p.ID));
+						SendData (curPlayer, String.Format ("RPLR{0}", c.ID));			
+			
+			SendData (string.Format("MESS{0} disconnected.",p.Name));
+			Console.WriteLine(String.Format("{0} Disconnected",p.Name));
 			Players.Remove(p);
 		}
 		static void SendNewPlayer (Player newPlayer)
