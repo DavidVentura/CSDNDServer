@@ -40,6 +40,10 @@ namespace Server
 
 	public static class Engine
 	{
+		public static int curTurn;
+		public static int TotalChars=0;
+		public static List<Character> playerIDInit= new List<Character>();
+
 		private const string ConnectionString = "URI=file:database.db";
 		private const int MAPID = 1;
 		private static IDbConnection dbcon;
@@ -124,6 +128,7 @@ namespace Server
 				                        reader.GetInt16(5),reader.GetInt16(6),reader.GetInt16(7), //will, reflex,fort
 				                        reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14)));
 			}
+			TotalChars+=chars.Count;
 			return new Player(id,chars,name,dm);
 		}
 		public static Character GetMob (int id, int x, int y)
@@ -151,6 +156,44 @@ namespace Server
 			return ret;
 		}
 
+		internal static void RollInitiative ()
+		{
+			bool inserted;
+			playerIDInit.Clear();
+			foreach (Player p in Network.Players)
+				foreach (Character c in p.chars) {
+					inserted=false;
+					c.RollInitiative ();
+					for (int i=0; i < playerIDInit.Count;i++)
+						if (c.currentInitiative<playerIDInit[i].currentInitiative){
+							inserted=true;
+							playerIDInit.Insert(i,c);
+							break;
+						}
+					if (!inserted)
+						playerIDInit.Add(c);
+				}
+			curTurn=0;
+		}
+		public static string InitiativeString ()
+		{
+			string data="INIT";
+			for (int i=0; i<playerIDInit.Count; i++)
+				data += playerIDInit [i].Name + " " + playerIDInit [i].currentInitiative + "(" + playerIDInit [i].initiative + "),";
+			return data;
+		}
+		public static void Delay (Character c)
+		{
+			Character aux;
+			for (int i=0; i< playerIDInit.Count-1; i++) { // -1 because I won't switch anything if he is the last one
+				if (playerIDInit[i].ID == c.ID){
+					aux = playerIDInit[i];
+					playerIDInit[i]=playerIDInit[i+1];
+					playerIDInit[i+1]=aux;
+					return;
+				}
+			}
+		}
 
 	}
 }

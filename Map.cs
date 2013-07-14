@@ -79,7 +79,7 @@ namespace Server
 			if (!withinBounds (position))
 				return false;
 
-			foreach (Player p in Network.getPlayers)
+			foreach (Player p in Network.Players)
 				foreach (Character c in p.chars)
 					for (int x = 0; x < c.Size; x++) 
 						for (int y = 0; y < c.Size; y++) {

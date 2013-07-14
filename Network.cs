@@ -10,11 +10,8 @@ namespace Server
 	public static class Network
 	{
 		private static TcpListener tcpListener;
-		private static List<Player> Players = new List<Player>();
+		public static List<Player> Players = new List<Player>();
 		private static ASCIIEncoding encoder = new ASCIIEncoding();
-		public static List<Player> getPlayers {
-			get { return Players; }
-		}
 		public static void Init ()
 		{
 			tcpListener = new TcpListener(IPAddress.Any,30000);
@@ -61,7 +58,6 @@ namespace Server
 							return;
 						}
 						Console.WriteLine (String.Format("{0} connected",curPlayer.Name));	
-
 						SendInitialData (curPlayer);
 						if (curPlayer.chars.Count > 0){
 							SendData(clientStream, "SWCH" + curPlayer.chars[0].ID);//assign the first player upon logging in
@@ -72,8 +68,8 @@ namespace Server
 						Character mob = Engine.GetMob(Int32.Parse(args[0]),Int32.Parse(args[1]),Int32.Parse(args[2]));
 						if (mob ==null) break; //invalid
 						if (!Map.ValidPosition(mob.Position,mob)) break;
+					Engine.TotalChars++;
 						curPlayer.chars.Add(mob);
-
 						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.ID,mob.Position.X,mob.Position.Y,mob.textureID,mob.Name,mob.Size,mob.VisionRange));
 						SendNewPlayer(curPlayer);
 						break;
@@ -106,7 +102,9 @@ namespace Server
 							}
 						break;
 					case "INIT": //initiative
-						SendInitiative ();
+						Engine.RollInitiative();
+						SendData(Engine.InitiativeString());
+						SendData("CURT0");
 						break;
 					case "REFL": //reflexes
 						SendReflexes ();
@@ -119,6 +117,16 @@ namespace Server
 						break;
 					case "DMMD": //DM mode
 						curChar = null;
+						break;
+					case "NEXT": //Next turn
+						Engine.curTurn++;
+						if (Engine.curTurn >= Engine.TotalChars)
+							Engine.curTurn=0;
+						SendData("CURT"+Engine.curTurn);
+						break;
+					case "DELA": //delay
+						Engine.Delay(curChar);
+						SendData(Engine.InitiativeString());
 						break;
 
 				}
@@ -158,7 +166,6 @@ namespace Server
 
 		static Player AddPlayer (TcpClient socket, string name)
 		{
-
 			Player p =  Engine.Login(name);
 			if (p==null) 
 				return null;
@@ -180,7 +187,7 @@ namespace Server
 			ns.Flush();
 			Thread.Sleep(10);
 		}
-		static void SendData (string data)
+		internal static void SendData (string data)
 		{
 			foreach (Player p in Players) {
 				if (p.socket.Connected)
@@ -194,9 +201,11 @@ namespace Server
 					if (curPlayer != p)
 						SendData (curPlayer, String.Format ("RPLR{0}", c.ID));			
 			
-			SendData (string.Format("MESS{0} disconnected.",p.Name));
+			SendData(String.Format("MESS{0} disconnected.",p.Name));
 			Console.WriteLine(String.Format("{0} Disconnected",p.Name));
+			Engine.TotalChars-=p.chars.Count;
 			Players.Remove(p);
+
 		}
 		static void SendNewPlayer (Player newPlayer)
 		{
@@ -229,13 +238,7 @@ namespace Server
 					SendData(p,String.Format("TALK{0},{1}",n,text));
 		}
 
-		static void SendInitiative() {
-			string data = "MESSInitiatives:\n";
-			foreach (Player p in Players)
-				foreach (Character c in p.chars)
-					data += c.Name + ": "+c.RollInitiative()+"\n";
-			SendData (data);
-		}
+
 		static void SendReflexes() {
 			string data = "MESSReflexes:\n";
 			foreach (Player p in Players)

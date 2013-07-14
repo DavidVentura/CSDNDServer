@@ -59,6 +59,8 @@ namespace Server
 			set { position = value; }
 		}
 
+		public int currentInitiative;
+
 		public Saves saves;
 		public Attributes attributes;
 		public int initiative;
@@ -100,10 +102,9 @@ namespace Server
 			return true;
 		}
 
-		public string RollInitiative ()
+		public void RollInitiative ()
 		{
-			int val = Engine.D10;
-			return val + "(d10)+" + initiative + "=" + (val + initiative);
+			currentInitiative= Engine.D10+initiative;
 		}
 		public string RollReflexes ()
 		{
