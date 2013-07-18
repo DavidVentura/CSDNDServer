@@ -1,4 +1,6 @@
 using System.Net.Sockets;
+using System.Collections.Generic;
+using System;
 
 namespace Server
 {
@@ -17,6 +19,7 @@ namespace Server
 	}
 	public class Character
 	{
+		#region Member objects
 		private int id=1;
 		public int ID {
 			get { return id; }
@@ -60,10 +63,12 @@ namespace Server
 		}
 
 		public int currentInitiative;
+		public List<Buff> Buffs = new List<Buff>();
 
 		public Saves saves;
 		public Attributes attributes;
 		public int initiative;
+		#endregion
 		public Character (int id, string name, int sprite, int visionrange, int size,
 		                  int will,int reflex,int fortitude,int cha,int wis,int intel,int con,int dex,int str,int init)
 		{
@@ -89,6 +94,29 @@ namespace Server
 			position = Map.Spawnpoint;
 		}
 
+		public Character (Character mob, int i)
+		{
+			saves.FORT = mob.saves.FORT;
+			saves.REF = mob.saves.REF;
+			saves.WILL = mob.saves.WILL;
+
+			attributes.CHA = mob.attributes.CHA;
+			attributes.CON = mob.attributes.CON;
+			attributes.INT = mob.attributes.INT;
+			attributes.WIS = mob.attributes.WIS;
+			attributes.STR = mob.attributes.STR;
+			attributes.DEX = mob.attributes.DEX;
+
+			initiative = mob.initiative;
+
+			this.size = mob.size;
+			this.id=i;
+			this.name=mob.name;
+			
+			visionRange = mob.visionRange;
+			texture = mob.texture;
+			id = i;
+		}
 		public bool Move (Coord targetPos)
 		{
 			if (!Map.withinBounds (position + targetPos))
@@ -109,18 +137,26 @@ namespace Server
 		public string RollReflexes ()
 		{
 			int val = Engine.D20;
-			return val + "(d20)+" + saves.REF + "=" + (val + saves.REF);
+			return String.Format("({0})+{1}={2}", val,saves.REF,val + saves.REF);
 		}
 		public string RollFort ()
 		{
 			int val = Engine.D20;
-			return val + "(d20)+" + saves.FORT + "=" + (val + saves.FORT);
+			return String.Format("({0})+{1}={2}", val,saves.FORT,val + saves.FORT);
 		}
 		public string RollWill ()
 		{
 			int val = Engine.D20;
-			return val + "(d20)+" + saves.WILL + "=" + (val + saves.WILL);
+			return String.Format("({0})+{1}={2}", val,saves.WILL,val + saves.WILL);
 		}
+		public void AddBuff(Character caster,int Duration, string description) {
+			Buffs.Add(new Buff(caster,Duration,description));
+		}
+		public void UpdateBuffsDuration(Character caster){
+			foreach(Buff b in Buffs)
+				if (b.Caster.ID == caster.ID) b.RoundEnds();
+		}
+
 	}
 }
 

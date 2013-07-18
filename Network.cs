@@ -65,10 +65,11 @@ namespace Server
 						}
 						break;
 					case "SPWN"://spawn mob, ID,x ,y
-						Character mob = Engine.GetMob(Int32.Parse(args[0]),Int32.Parse(args[1]),Int32.Parse(args[2]));
+						Character mob = Engine.GetMob(Int32.Parse(args[0]));
 						if (mob ==null) break; //invalid
+						mob.Position=new Coord(Int32.Parse(args[1]),Int32.Parse(args[2]));
 						if (!Map.ValidPosition(mob.Position,mob)) break;
-					Engine.TotalChars++;
+						Engine.TotalChars++;
 						curPlayer.chars.Add(mob);
 						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.ID,mob.Position.X,mob.Position.Y,mob.textureID,mob.Name,mob.Size,mob.VisionRange));
 						SendNewPlayer(curPlayer);
@@ -137,13 +138,18 @@ namespace Server
 
 		static void SendInitialData (Player p)
 		{
-			NetworkStream clientStream = p.socket.GetStream();
-			foreach(Character c in p.chars)
-				SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",c.ID,c.Position.X,c.Position.Y,c.textureID,c.Name,c.Size,c.VisionRange));
+			NetworkStream clientStream = p.socket.GetStream ();
+			foreach (Character c in p.chars)
+				SendData (clientStream, String.Format ("LOGI{0},{1},{2},{3},{4},{5},{6}", c.ID, c.Position.X, c.Position.Y, c.textureID, c.Name, c.Size, c.VisionRange));
 
 
-			if(p.isDM)
-				SendData(clientStream,"DMOK");
+			if (p.isDM) {
+				SendData (clientStream, "DMOK");
+				string s="MOBS";
+				foreach(Character mob in Engine.Mobs)
+					s+=String.Format("{0}-{1},",mob.ID,mob.Name);
+				SendData(clientStream,s);
+			}
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
 			SendNewPlayer(p); //send the newly logged user to everyone else, and every logged user to the new one
@@ -181,7 +187,7 @@ namespace Server
 			SendData (p.socket.GetStream(),data);
 		}
 		static void SendData(NetworkStream ns, string data) {
-			data+="|";
+			if (!data.EndsWith("|")) data+="|";
 			byte[] buffer = encoder.GetBytes(data);
 			ns.Write(buffer,0,buffer.Length);
 			ns.Flush();

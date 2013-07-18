@@ -43,6 +43,7 @@ namespace Server
 		public static int curTurn;
 		public static int TotalChars=0;
 		public static List<Character> playerIDInit= new List<Character>();
+		public static List<Character> Mobs=new List<Character>();
 
 		private const string ConnectionString = "URI=file:database.db";
 		private const int MAPID = 1;
@@ -96,7 +97,9 @@ namespace Server
 			while (reader.Read ()) 
 				Map.ParseMapLayer((LayerType)reader.GetInt16 (0),  Map.Width, Map.Height, reader.GetString (1));
 			Console.WriteLine ("Layers loaded");
-
+			Console.WriteLine("Loading Mobs");
+			GetAllMobs();
+			Console.WriteLine("Mobs loaded");
 			Console.WriteLine ("Finished loading");
 		}
 
@@ -131,29 +134,33 @@ namespace Server
 			TotalChars+=chars.Count;
 			return new Player(id,chars,name,dm);
 		}
-		public static Character GetMob (int id, int x, int y)
+		public static void GetAllMobs ()
 		{
-			Character ret=null;
 			string name;
-			int sprite,visionrange,size;
-			Coord pos = new Coord(x,y);
-			if (!Map.withinBounds(pos)) return null;
+			int sprite,visionrange,size,id;
 			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE,WILL,REFLEX,FORTITUDE,CHA,WIS,INT,CON,DEX,STR,INITIATIVE FROM MOBS WHERE ID='{0}'",id);
+			dbcmd.CommandText = "SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE,WILL,REFLEX,FORTITUDE,CHA,WIS,INT,CON,DEX,STR,INITIATIVE FROM MOBS";
 			reader = dbcmd.ExecuteReader ();
-			if (reader.Read ()) {
-				//don't need the ID
+			while (reader.Read ()) {
+				id = reader.GetInt16(0);
 				name = reader.GetString(1);
 				sprite = reader.GetInt32(2);
 				visionrange = reader.GetInt32(3);
 				size = reader.GetInt32(4);
 
-				ret = new Character(curMobID++,name,sprite,visionrange,size,
+				Mobs.Add (new Character(id,name,sprite,visionrange,size,
 				                    reader.GetInt16(5),reader.GetInt16(6),reader.GetInt16(7), //will, reflex,fort
-				                    reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14));
-				ret.Position= pos;
+				                    reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14)));
 			}
-			return ret;
+		}
+
+		public static Character GetMob (int id)
+		{
+			foreach (Character mob in Mobs)
+				if (mob.ID == id) {
+					return new Character(mob,curMobID++); //unique char id
+				}
+			return null;
 		}
 
 		internal static void RollInitiative ()

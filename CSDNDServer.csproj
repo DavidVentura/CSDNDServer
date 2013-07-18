@@ -50,6 +50,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="Buff.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
