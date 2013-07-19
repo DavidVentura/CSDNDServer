@@ -19,7 +19,7 @@ namespace Server
 			new Thread(new ThreadStart(ListenForClients)).Start();
 			Console.ReadLine();
 		}
-		public static void ListenForClients(){
+		private static void ListenForClients(){
 			tcpListener.Start() ;
 			while(true){
 				TcpClient client = tcpListener.AcceptTcpClient();
@@ -135,7 +135,6 @@ namespace Server
 			tcpClient.Close();
 			RemovePlayer(curPlayer);
 		}
-
 		static void SendInitialData (Player p)
 		{
 			NetworkStream clientStream = p.socket.GetStream ();
@@ -154,7 +153,6 @@ namespace Server
 			SendData(clientStream,LayerToString(LayerType.Object));
 			SendNewPlayer(p); //send the newly logged user to everyone else, and every logged user to the new one
 		}
-
 		static string LayerToString (LayerType t)
 		{
 			int type =(int)t;
@@ -169,7 +167,6 @@ namespace Server
 			}
 			return data;
 		}
-
 		static Player AddPlayer (TcpClient socket, string name)
 		{
 			Player p =  Engine.Login(name);
@@ -225,14 +222,12 @@ namespace Server
 						//send the old player's chars to the new one
 				}
 		}
-
 		static void SendMovement (Character curPlayer)
 		{
 			string data = String.Format("MPLR{0},{1},{2}",curPlayer.ID,curPlayer.Position.X,curPlayer.Position.Y,curPlayer.textureID);
 			foreach (Player p in Players)
 				SendData(p.socket.GetStream(),data);
 		}
-
 		static void SendText (Character current, string text)
 		{
 			string n;
@@ -243,8 +238,6 @@ namespace Server
 			foreach (Player p in Players)
 					SendData(p,String.Format("TALK{0},{1}",n,text));
 		}
-
-
 		static void SendReflexes() {
 			string data = "MESSReflexes:\n";
 			foreach (Player p in Players)
@@ -266,7 +259,5 @@ namespace Server
 					data += c.Name + ": "+c.RollWill()+"\n";
 			SendData (data);
 		}
-
 	}
 }
-

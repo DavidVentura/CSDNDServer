@@ -44,6 +44,8 @@ namespace Server
 		public static int TotalChars=0;
 		public static List<Character> playerIDInit= new List<Character>();
 		public static List<Character> Mobs=new List<Character>();
+		public static string Tiles,Objects;
+
 
 		private const string ConnectionString = "URI=file:database.db";
 		private const int MAPID = 1;
@@ -65,15 +67,13 @@ namespace Server
 		public static int D20 {
 			get { return rnd.Next (1, 20); }
 		}
-
 		public static void Initialize ()
 		{
 			LoadDatabase();
 		}
-
 		private static void LoadDatabase ()
 		{
-			Console.WriteLine ("Started loading from DB");
+			Console.WriteLine ("Started loading map from DB");
 
 			#if LINUX
 				dbcon = (IDbConnection)new SqliteConnection (ConnectionString);
@@ -81,6 +81,15 @@ namespace Server
 				dbcon = (IDbConnection)new SQLiteConnection (ConnectionString);
 			#endif
 			dbcon.Open ();
+
+			Console.WriteLine("Loading Tiles");
+			GetTiles();
+			Console.WriteLine("Tiles loaded");
+			Console.WriteLine("Loading Objects");
+			GetObjects();
+			Console.WriteLine("Objects loaded");
+
+
 			dbcmd = dbcon.CreateCommand ();
 
 			dbcmd.CommandText = "SELECT WIDTH,HEIGHT,SPAWNX,SPAWNY FROM MAP WHERE ID=" + MAPID;
@@ -102,7 +111,6 @@ namespace Server
 			Console.WriteLine("Mobs loaded");
 			Console.WriteLine ("Finished loading");
 		}
-
 		public static void Unload() { //TODO:Call this
 			reader.Close();
 			reader = null;
@@ -134,7 +142,7 @@ namespace Server
 			TotalChars+=chars.Count;
 			return new Player(id,chars,name,dm);
 		}
-		public static void GetAllMobs ()
+		private static void GetAllMobs ()
 		{
 			string name;
 			int sprite,visionrange,size,id;
@@ -153,7 +161,36 @@ namespace Server
 				                    reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14)));
 			}
 		}
-
+		private static void GetTiles ()
+		{
+			string desc;
+			int texture;
+			Tiles = "TILE";
+			dbcmd = dbcon.CreateCommand ();
+			dbcmd.CommandText = "SELECT TEXTURE,DESCRIPTION FROM TILES";
+			reader = dbcmd.ExecuteReader ();
+			while (reader.Read ()) {
+				texture=reader.GetInt16(0);
+				desc=reader.GetString(1);
+				Tiles+=texture+"-"+desc+",";
+			}
+			Tiles=Tiles.TrimEnd(',');
+		}
+		private static void GetObjects ()
+		{
+			string desc;
+			int texture;
+			dbcmd = dbcon.CreateCommand ();
+			dbcmd.CommandText = "SELECT TEXTURE,DESCRIPTION FROM OBJECTS";
+			reader = dbcmd.ExecuteReader ();
+			Objects="OBJS";
+			while (reader.Read ()) {
+				texture=reader.GetInt16(0);
+				desc=reader.GetString(1);
+				Objects+=texture+"-"+desc+",";
+			}
+			Objects=Objects.TrimEnd(',');
+		}
 		public static Character GetMob (int id)
 		{
 			foreach (Character mob in Mobs)
