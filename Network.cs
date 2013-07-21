@@ -148,6 +148,8 @@ namespace Server
 				foreach(Character mob in Engine.Mobs)
 					s+=String.Format("{0}-{1},",mob.ID,mob.Name);
 				SendData(clientStream,s);
+				SendData(clientStream,Engine.Objects);
+				SendData(clientStream,Engine.Tiles);
 			}
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));
