@@ -75,8 +75,8 @@ namespace Server
 						SendNewPlayer(curPlayer);
 						break;
 					case "TILE":
-						Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2])); //ID,X,Y
-						SendData(String.Format("CTIL{0},{1},{2}",args[0],args[1],args[2]));
+						if (Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]))); //ID,X,Y
+							SendData(String.Format("CTIL{0},{1},{2}",args[0],args[1],args[2]));
 						break;
 					case "SOBJ": //set the TILE, blocking?, on x,y
 						if (curPlayer.isDM) {

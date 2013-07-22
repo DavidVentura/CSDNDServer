@@ -51,6 +51,7 @@
     <Compile Include="Character.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Buff.cs" />
+    <Compile Include="Spell.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />

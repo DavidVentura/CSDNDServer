@@ -112,9 +112,13 @@ namespace Server
 			Blocks.tiles[x,y]=blocking;
 			Objects.tiles[x,y]=objID;
 		}
-		public static void ChangeTile (int tileID, int x, int y)
+		public static bool ChangeTile (int tileID, int x, int y)
 		{
-			Ground.tiles[x,y]=tileID;
+			if (Ground.tiles [x, y] != tileID) {
+				Ground.tiles [x, y] = tileID;
+				return true;
+			}
+			return false;
 		}
 	}
 }
