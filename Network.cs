@@ -74,9 +74,13 @@ namespace Server
 						SendData(clientStream,String.Format("LOGI{0},{1},{2},{3},{4},{5},{6}",mob.ID,mob.Position.X,mob.Position.Y,mob.textureID,mob.Name,mob.Size,mob.VisionRange));
 						SendNewPlayer(curPlayer);
 						break;
+					case "TILE":
+						Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2])); //ID,X,Y
+						SendData(String.Format("CTIL{0},{1},{2}",args[0],args[1],args[2]));
+						break;
 					case "SOBJ": //set the TILE, blocking?, on x,y
 						if (curPlayer.isDM) {
-							Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]),Int16.Parse(args[3]));
+							Map.ChangeObject(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]),Int16.Parse(args[3]));
 							SendData(String.Format("SOBJ{0},{1},{2}",args[0],args[2],args[3])); //id and pos, blocking is handled server-side
 						}
 					break;
@@ -149,7 +153,7 @@ namespace Server
 					s+=String.Format("{0}-{1},",mob.ID,mob.Name);
 				SendData(clientStream,s);
 				SendData(clientStream,Engine.Objects);
-				SendData(clientStream,Engine.Tiles);
+				SendData(clientStream,Engine.SerializeTiles());
 			}
 			SendData(clientStream,LayerToString(LayerType.Ground));
 			SendData(clientStream,LayerToString(LayerType.Object));

@@ -38,13 +38,28 @@ namespace Server
 
 	}
 
+	public struct Tile {
+		int id;
+		string description;
+		public Tile (int i, string d)
+		{
+			id = i;
+			description = d;
+		}
+		public string Get() {
+			return id.ToString()+"-"+description+",";
+		}
+	}
+
 	public static class Engine
 	{
 		public static int curTurn;
 		public static int TotalChars=0;
 		public static List<Character> playerIDInit= new List<Character>();
 		public static List<Character> Mobs=new List<Character>();
-		public static string Tiles,Objects;
+		static List<Tile> Tiles = new List<Tile>();
+
+		public static string Objects;
 
 
 		private const string ConnectionString = "URI=file:database.db";
@@ -165,16 +180,20 @@ namespace Server
 		{
 			string desc;
 			int texture;
-			Tiles = "TILE";
 			dbcmd = dbcon.CreateCommand ();
 			dbcmd.CommandText = "SELECT TEXTURE,DESCRIPTION FROM TILES";
 			reader = dbcmd.ExecuteReader ();
 			while (reader.Read ()) {
 				texture=reader.GetInt16(0);
 				desc=reader.GetString(1);
-				Tiles+=texture+"-"+desc+",";
+				Tiles.Add(new Tile(texture,desc));
 			}
-			Tiles=Tiles.TrimEnd(',');
+		}
+		public static string SerializeTiles() {
+			string ret ="TILE";
+			foreach(Tile t in Tiles)
+				ret+=t.Get();
+			return ret.TrimEnd(',');
 		}
 		private static void GetObjects ()
 		{
