@@ -75,12 +75,12 @@ namespace Server
 						SendNewPlayer(curPlayer);
 						break;
 					case "TILE":
-						if (Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]))); //ID,X,Y
+						if (Map.ChangeTile(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]))) //ID,X,Y
 							SendData(String.Format("CTIL{0},{1},{2}",args[0],args[1],args[2]));
 						break;
 					case "SOBJ": //set the TILE, blocking?, on x,y
 						if (curPlayer.isDM) {
-							Map.ChangeObject(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]),Int16.Parse(args[3]));
+							if (Map.ChangeObject(Int16.Parse(args[0]),Int16.Parse(args[1]),Int16.Parse(args[2]),Int16.Parse(args[3])))
 							SendData(String.Format("SOBJ{0},{1},{2}",args[0],args[2],args[3])); //id and pos, blocking is handled server-side
 						}
 					break;
@@ -124,6 +124,11 @@ namespace Server
 						curChar = null;
 						break;
 					case "NEXT": //Next turn
+						foreach(Player p in Players){
+							if (p != curPlayer)
+								foreach (Character c in p.chars)
+									c.UpdateBuffsDuration (curChar);
+						}
 						Engine.curTurn++;
 						if (Engine.curTurn >= Engine.TotalChars)
 							Engine.curTurn=0;
@@ -133,7 +138,12 @@ namespace Server
 						Engine.Delay(curChar);
 						SendData(Engine.InitiativeString());
 						break;
-
+					case "BUFF": //buff
+						int targetID = Int32.Parse (args [0]);
+						int duration = Int32.Parse (args [1]);
+						AddBuff (curChar, targetID, duration, args [2]);
+						SendData (String.Format("BUFF{0},{1},{2}",targetID,duration,args[2]));
+						break;
 				}
 			}
 			tcpClient.Close();
@@ -264,6 +274,16 @@ namespace Server
 				foreach (Character c in p.chars)
 					data += c.Name + ": "+c.RollWill()+"\n";
 			SendData (data);
+		}
+
+		static void AddBuff (Character curChar, int targetID, int duration, string str)
+		{
+			foreach (Player p in Players) 
+				foreach (Character c in p.chars) 
+					if (c.ID == targetID) {
+						c.AddBuff (curChar, duration, "descripcion");
+						return;
+					}
 		}
 	}
 }

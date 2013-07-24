@@ -64,6 +64,7 @@ namespace Server
 
 		public int currentInitiative;
 		public List<Buff> Buffs = new List<Buff>();
+		public List<Spell> Spells = new List<Spell>();
 
 		public Saves saves;
 		public Attributes attributes;
@@ -156,7 +157,6 @@ namespace Server
 			foreach(Buff b in Buffs)
 				if (b.Caster.ID == caster.ID) b.RoundEnds();
 		}
-
 	}
 }
 

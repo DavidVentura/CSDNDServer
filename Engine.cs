@@ -38,6 +38,15 @@ namespace Server
 
 	}
 
+	public struct Equation {
+		string val;
+		public Equation(string eq) {
+			val = eq;
+		}
+		public string Value() {
+			return val;
+		}
+	}
 	public struct Tile {
 		int id;
 		string description;
@@ -228,7 +237,7 @@ namespace Server
 					inserted=false;
 					c.RollInitiative ();
 					for (int i=0; i < playerIDInit.Count;i++)
-						if (c.currentInitiative<playerIDInit[i].currentInitiative){
+						if (c.currentInitiative>playerIDInit[i].currentInitiative){
 							inserted=true;
 							playerIDInit.Insert(i,c);
 							break;

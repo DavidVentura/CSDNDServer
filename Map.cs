@@ -107,18 +107,20 @@ namespace Server
 			if (type==LayerType.Object) Objects= new MapLayer(type,width,height,data);
 			if (type==LayerType.Ground) Ground= new MapLayer(type,width,height,data);
 		}
-		public static void ChangeObject (int objID, int blocking, int x, int y)
+		public static bool ChangeObject (int objID, int blocking, int x, int y)
 		{
 			Blocks.tiles[x,y]=blocking;
+			if (Objects.tiles [x, y] == objID)
+				return false;
 			Objects.tiles[x,y]=objID;
+			return true;
 		}
 		public static bool ChangeTile (int tileID, int x, int y)
 		{
-			if (Ground.tiles [x, y] != tileID) {
-				Ground.tiles [x, y] = tileID;
-				return true;
-			}
-			return false;
+			if (Ground.tiles [x, y] == tileID)
+				return false;
+			Ground.tiles [x, y] = tileID;
+			return true;
 		}
 	}
 }
