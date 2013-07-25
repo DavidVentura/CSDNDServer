@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Text.RegularExpressions;
 #if LINUX
 using Mono.Data.Sqlite;
 #else
@@ -39,12 +40,28 @@ namespace Server
 	}
 
 	public struct Equation {
+		static Regex parser = new Regex ("[+-]?((?<dice>(?<mult>[0-9]+)[dD](?<cat>[0-9]+))|(?<number>[0-9]+))", RegexOptions.Compiled);
 		string val;
-		public Equation(string eq) {
+		string multiplier;
+		public Equation(string mult, string eq) {
 			val = eq;
+			multiplier = mult;
 		}
 		public string Value() {
-			return val;
+			int parsedMultiplier = Equation.Parse (multiplier);
+			string ret="";
+			for (int i =0; i<parsedMultiplier; i++)
+				ret += "";
+			return ret;
+		}
+		public static int Parse(string v) {
+			MatchCollection matches = parser.Matches (v);
+			foreach (Match m in matches)
+				foreach(Group g in m.Groups)
+				Console.WriteLine ("matches={0}", g);
+
+			return 0;
+			//2d4||2||//1d8+2d6+4
 		}
 	}
 	public struct Tile {
@@ -98,7 +115,7 @@ namespace Server
 		private static void LoadDatabase ()
 		{
 			Console.WriteLine ("Started loading map from DB");
-
+			Equation.Parse ("2d6+7+4d8-16");
 			#if LINUX
 				dbcon = (IDbConnection)new SqliteConnection (ConnectionString);
 			#else
