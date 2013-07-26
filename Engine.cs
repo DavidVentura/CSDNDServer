@@ -40,29 +40,57 @@ namespace Server
 	}
 
 	public struct Equation {
-		static Regex parser = new Regex ("[+-]?((?<dice>(?<mult>[0-9]+)[dD](?<cat>[0-9]+))|(?<number>[0-9]+))", RegexOptions.Compiled);
+		static Regex DiceParser = new Regex ("(?<sign>[+-])?((?<dice>(?<mult>[0-9]+)[dD](?<cat>[0-9]+))|(?<number>[0-9]+))", RegexOptions.Compiled);
 		string val;
 		string multiplier;
-		public Equation(string mult, string eq) {
+		string description;
+		public Equation(string desc, string mult, string eq) {
+			description=desc;
 			val = eq;
 			multiplier = mult;
 		}
-		public string Value() {
+		public string Value ()
+		{
 			int parsedMultiplier = Equation.Parse (multiplier);
-			string ret="";
-			for (int i =0; i<parsedMultiplier; i++)
-				ret += "";
+			int total = 0;
+			int curTotal=0;
+			string ret = description+'\n';
+			for (int i =0; i<parsedMultiplier; i++) {
+				curTotal=Equation.Parse (val);
+				total+=curTotal;
+				ret += val + " = " + curTotal+'\n';
+			}
 			return ret;
 		}
-		public static int Parse(string v) {
-			MatchCollection matches = parser.Matches (v);
-			foreach (Match m in matches)
-				foreach(Group g in m.Groups)
-				Console.WriteLine ("matches={0}", g);
-
-			return 0;
-			//2d4||2||//1d8+2d6+4
+		public static int Parse (string v)
+		{
+			MatchCollection matches = DiceParser.Matches (v);
+			int sign;
+			int sum=0;
+			foreach (Match m in matches) {
+				sign=1;
+				if (m.Groups["sign"].Success) {
+					if (m.Groups["sign"].Value=="-")
+						sign=-1;
+				}
+				if (m.Groups["dice"].Success){
+					int mult=Int32.Parse(m.Groups["mult"].Value);
+					int cat=Int32.Parse(m.Groups["cat"].Value);
+					int DiceSum=0;
+					for (int i=0; i<mult;i++)
+						DiceSum+=Engine.Roll(cat);
+					sum+=sign*DiceSum;
+				} else {
+					sum+=sign*Int32.Parse(m.Groups["number"].Value);
+				}
+			}
+			return sum;
 		}
+		public string GetDescription ()
+		{
+			return description;
+		}
+
 	}
 	public struct Tile {
 		int id;
@@ -108,6 +136,12 @@ namespace Server
 		public static int D20 {
 			get { return rnd.Next (1, 20); }
 		}
+
+		public static int Roll (int i)
+		{
+			return rnd.Next(1,i);
+		}
+
 		public static void Initialize ()
 		{
 			LoadDatabase();
@@ -115,7 +149,7 @@ namespace Server
 		private static void LoadDatabase ()
 		{
 			Console.WriteLine ("Started loading map from DB");
-			Equation.Parse ("2d6+7+4d8-16");
+
 			#if LINUX
 				dbcon = (IDbConnection)new SqliteConnection (ConnectionString);
 			#else
@@ -180,6 +214,7 @@ namespace Server
 				                        reader.GetInt16(5),reader.GetInt16(6),reader.GetInt16(7), //will, reflex,fort
 				                        reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14)));
 			}
+
 			TotalChars+=chars.Count;
 			return new Player(id,chars,name,dm);
 		}

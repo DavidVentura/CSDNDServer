@@ -144,6 +144,15 @@ namespace Server
 						AddBuff (curChar, targetID, duration, args [2]);
 						SendData (String.Format("BUFF{0},{1},{2}",targetID,duration,args[2]));
 						break;
+					case "AROL": //add roll: desc, mult,val
+						if (curChar==null) break;
+						curChar.AddEquation(new Equation(args[0],args[1],args[2]));
+						break;
+					case "ROLL":
+						string m=curChar.RollEquation (args[0]);
+						if (m!=null)
+						SendData("MESS"+m);
+						break;
 				}
 			}
 			tcpClient.Close();

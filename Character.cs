@@ -65,6 +65,7 @@ namespace Server
 		public int currentInitiative;
 		public List<Buff> Buffs = new List<Buff>();
 		public List<Spell> Spells = new List<Spell>();
+		public List<Equation> Equations = new List<Equation>();
 
 		public Saves saves;
 		public Attributes attributes;
@@ -157,6 +158,17 @@ namespace Server
 			foreach(Buff b in Buffs)
 				if (b.Caster.ID == caster.ID) b.RoundEnds();
 		}
+		public void AddEquation(Equation e) {
+			Equations.Add (e);
+		}
+		public string RollEquation (string str)
+		{
+			foreach (Equation e in Equations)
+				if (e.GetDescription () == str)
+					return e.Value();
+			return null;
+		}
+
 	}
 }
 
