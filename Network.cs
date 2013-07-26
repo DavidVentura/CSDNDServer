@@ -147,11 +147,12 @@ namespace Server
 					case "AROL": //add roll: desc, mult,val
 						if (curChar==null) break;
 						curChar.AddEquation(new Equation(args[0],args[1],args[2]));
+						SendData(curPlayer,"ROLL"); //roll was valid
 						break;
 					case "ROLL":
 						string m=curChar.RollEquation (args[0]);
 						if (m!=null)
-						SendData("MESS"+m);
+						SendText(curChar,m);
 						break;
 				}
 			}

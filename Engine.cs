@@ -41,6 +41,7 @@ namespace Server
 
 	public struct Equation {
 		static Regex DiceParser = new Regex ("(?<sign>[+-])?((?<dice>(?<mult>[0-9]+)[dD](?<cat>[0-9]+))|(?<number>[0-9]+))", RegexOptions.Compiled);
+		//TODO static Regex DiceParser = new Regex("(?<sign>[+-])?(?<mult>[0-9]+)(?<cat>[dD][0-9]+)?", RegexOptions.Compiled); //if cat.success -> dice; else -> static
 		string val;
 		string multiplier;
 		string description;
@@ -53,13 +54,19 @@ namespace Server
 		{
 			int parsedMultiplier = Equation.Parse (multiplier);
 			int total = 0;
-			int curTotal=0;
-			string ret = description+'\n';
+			int curTotal = 0;
+			string ret;
+			if (parsedMultiplier == 1)
+				return  String.Format("{0}: {1} = {2}",description,val,Equation.Parse(val));
+
+			ret= String.Format("{0}:{1}({2})x({3})"+'\n',description,multiplier,parsedMultiplier,val);
 			for (int i =0; i<parsedMultiplier; i++) {
 				curTotal=Equation.Parse (val);
 				total+=curTotal;
-				ret += val + " = " + curTotal+'\n';
+				ret += curTotal+"; ";
 			}
+			ret=ret.TrimEnd().TrimEnd(';')+'\n';
+			ret +="Total: " + total;
 			return ret;
 		}
 		public static int Parse (string v)
