@@ -42,8 +42,8 @@ namespace Server
 	public struct Equation {
 		static Regex DiceParser = new Regex ("(?<sign>[+-])?((?<dice>(?<mult>[0-9]+)[dD](?<cat>[0-9]+))|(?<number>[0-9]+))", RegexOptions.Compiled);
 		//TODO static Regex DiceParser = new Regex("(?<sign>[+-])?(?<mult>[0-9]+)(?<cat>[dD][0-9]+)?", RegexOptions.Compiled); //if cat.success -> dice; else -> static
-		string val;
-		string multiplier;
+		public string val;
+		public string multiplier;
 		string description;
 		public Equation(string desc, string mult, string eq) {
 			description=desc;
@@ -202,24 +202,33 @@ namespace Server
 
 		public static Player Login (string name)
 		{
-			int id=0;
-			bool dm=false;
-			List<Character> chars = new List<Character>();
-			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID,DM FROM PLAYER WHERE NAME='{0}'",name.ToUpper());
+			int id = 0;
+			bool dm = false;
+			List<Character> chars = new List<Character> ();
+			dbcmd = dbcon.CreateCommand ();
+			dbcmd.CommandText = string.Format ("SELECT ID,DM FROM PLAYER WHERE NAME='{0}'", name.ToUpper ());
 			reader = dbcmd.ExecuteReader ();
 			if (reader.Read ()) {
-				id = reader.GetInt32(0);
-				dm = reader.GetBoolean(1);
+				id = reader.GetInt32 (0);
+				dm = reader.GetBoolean (1);
 			}
-			if (id==0) return null;
-			dbcmd = dbcon.CreateCommand();
-			dbcmd.CommandText = string.Format("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE,WILL,REFLEX,FORTITUDE,CHA,WIS,INT,CON,DEX,STR,INITIATIVE FROM CHARACTERS WHERE PLAYER='{0}'",id);
+			if (id == 0)
+				return null;
+			dbcmd = dbcon.CreateCommand ();
+			dbcmd.CommandText = String.Format ("SELECT ID,NAME,SPRITE,VISIONRANGE,SIZE,WILL,REFLEX,FORTITUDE,CHA,WIS,INT,CON,DEX,STR,INITIATIVE FROM CHARACTERS WHERE PLAYER='{0}'", id);
 			reader = dbcmd.ExecuteReader ();
 			while (reader.Read ()) {
-				chars.Add(new Character(reader.GetInt16(0),reader.GetString(1),reader.GetInt16(2),reader.GetInt16(3),reader.GetInt16(4), //up to size
-				                        reader.GetInt16(5),reader.GetInt16(6),reader.GetInt16(7), //will, reflex,fort
-				                        reader.GetInt16(8),reader.GetInt16(9),reader.GetInt16(10),reader.GetInt16(11),reader.GetInt16(12),reader.GetInt16(13),reader.GetInt16(14)));
+				chars.Add (new Character (reader.GetInt16 (0), reader.GetString (1), reader.GetInt16 (2), reader.GetInt16 (3), reader.GetInt16 (4), //up to size
+				                        reader.GetInt16 (5), reader.GetInt16 (6), reader.GetInt16 (7), //will, reflex,fort
+				                        reader.GetInt16 (8), reader.GetInt16 (9), reader.GetInt16 (10), reader.GetInt16 (11), reader.GetInt16 (12), reader.GetInt16 (13), reader.GetInt16 (14))
+				);
+			}
+			foreach (Character c in chars) {
+				dbcmd = dbcon.CreateCommand ();
+				dbcmd.CommandText = String.Format ("SELECT MULT,VALUE,DESC FROM PRESETS WHERE CHAR='{0}'", c.ID);
+				reader = dbcmd.ExecuteReader ();
+				while (reader.Read ())
+					c.AddEquation(new Equation(reader.GetString(2),reader.GetString(0),reader.GetString(1)));
 			}
 
 			TotalChars+=chars.Count;

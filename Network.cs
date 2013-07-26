@@ -154,6 +154,7 @@ namespace Server
 						if (m!=null)
 						SendText(curChar,m);
 						break;
+					
 				}
 			}
 			tcpClient.Close();
@@ -162,9 +163,15 @@ namespace Server
 		static void SendInitialData (Player p)
 		{
 			NetworkStream clientStream = p.socket.GetStream ();
-			foreach (Character c in p.chars)
+			foreach (Character c in p.chars) {
 				SendData (clientStream, String.Format ("LOGI{0},{1},{2},{3},{4},{5},{6}", c.ID, c.Position.X, c.Position.Y, c.textureID, c.Name, c.Size, c.VisionRange));
-
+				string aux="PRES";
+				if (c.Equations.Count>0) {
+					foreach(Equation e in c.Equations)
+						aux+=e.multiplier+"_"+e.val+"_"+e.GetDescription()+",";
+					SendData(clientStream,aux.TrimEnd(','));
+				}
+			}
 
 			if (p.isDM) {
 				SendData (clientStream, "DMOK");
